@@ -1,0 +1,22 @@
+from __future__ import annotations
+import datetime
+import pendulum
+from airflow import DAG
+from operators.RunSynapsePipelineOperator import SynapseRunPipelineOperator
+
+with DAG(
+    dag_id="AzureSynapseRunPipelineDag",
+    schedule="0 0 * * *",
+    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
+    catchup=False,
+    dagrun_timeout=datetime.timedelta(minutes=60),
+    tags=["pipeline"],
+) as dag: 
+    
+    trigger_synapse_pipeline = SynapseRunPipelineOperator(
+        azure_synapse_conn_id="azure_synapse_connection",
+        task_id='trigger_synapse_pipeline',
+        pipeline_name='Pipeline 1',
+    )
+
+    trigger_synapse_pipeline

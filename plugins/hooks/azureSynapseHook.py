@@ -3,7 +3,7 @@ import time
 from typing import TYPE_CHECKING, Any, Union
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 import requests
-from azure.synapse.artifacts.models import CreateRunResponse
+from azure.synapse.artifacts.models import CreateRunResponse, PipelineRun
 # from airflow.exceptions import AirflowTaskTimeout
 from airflow.hooks.base import BaseHook
 from airflow.providers.microsoft.azure.utils import get_field
@@ -148,6 +148,43 @@ class AzureSynapseHook(BaseHook):
             credential=credential
         )
     
+    def get_pipeline_run(
+        self,
+        run_id: str,
+        **config: Any,
+    ) -> PipelineRun:
+        """
+        Get the pipeline run.
+
+        :param run_id: The pipeline run identifier.
+        :param resource_group_name: The resource group name.
+        :param factory_name: The factory name.
+        :param config: Extra parameters for the ADF client.
+        :return: The pipeline run.
+        """
+
+        return self.get_conn().pipeline_run.get_pipeline_run(run_id=run_id)
+        # .get(resource_group_name, factory_name, run_id, **config)
+
+    def get_pipeline_run_status(
+        self,
+        run_id: str,
+    ) -> str:
+        """
+        Get a pipeline run's current status.
+
+        :param run_id: The pipeline run identifier.
+
+        :return: The status of the pipeline run.
+        """
+        self.log.info("Getting the status of run ID %s.", run_id)
+        pipeline_run_status = self.get_pipeline_run(
+            run_id=run_id,
+        ).status
+        self.log.info("Current status of pipeline run %s: %s", run_id, pipeline_run_status)
+
+        return pipeline_run_status
+
     def wait_for_pipeline_run_status(
         self,
         run_id: str,
@@ -167,5 +204,5 @@ class AzureSynapseHook(BaseHook):
         :return: Boolean indicating if the pipeline run has reached the ``expected_status``.
         """
 
-        pipeline_run_status = self.get_pipeline_run(run_id = run_id)
+        pipeline_run_status = self.get_pipeline_run_status(run_id = run_id)
         return pipeline_run_status

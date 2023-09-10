@@ -22,10 +22,10 @@ class SynapseRunPipelineOperator(BaseOperator):
         azure_synapse_workspace_dev_endpoint: str,
         *args, **kwargs
     ) -> None:
-        super().__init__(*args, **kwargs)
         self.azure_synapse_conn_id = azure_synapse_conn_id
         self.pipeline_name = pipeline_name
         self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint,
+        super().__init__(*args, **kwargs)
 
     @cached_property
     def hook(self):

@@ -24,7 +24,7 @@ class SynapseRunPipelineOperator(BaseOperator):
     ) -> None:
         self.azure_synapse_conn_id = azure_synapse_conn_id
         self.pipeline_name = pipeline_name
-        self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint,
+        self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
         super().__init__(*args, **kwargs)
 
     @cached_property

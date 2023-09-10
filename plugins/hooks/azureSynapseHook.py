@@ -112,15 +112,18 @@ class AzureSynapseHook(BaseHook):
 
     def run_pipeline(
         self,
-        pipeline_name: str
+        pipeline_name: str,
+        **config: Any,
     ) -> CreateRunResponse:
         """
         Run a Synapse pipeline.
 
         :param pipeline_name: The pipeline name.
+        :param config: Extra parameters for the Synapse Artifact Client.
+        :return: The pipeline run Id.
         """
         
-        return self.get_conn().pipeline.create_pipeline_run(pipeline_name)
+        return self.get_conn().pipeline.create_pipeline_run(pipeline_name, **config)
       
 
     def get_conn(self) -> ArtifactsClient:
@@ -141,7 +144,7 @@ class AzureSynapseHook(BaseHook):
             )
         else:
             credential = DefaultAzureCredential()
-        self._conn = self._create_client(credential, "https://ambika-synapse-workspace.dev.azuresynapse.net")
+        self._conn = self._create_client(credential, self.azure_synapse_workspace_dev_endpoint)
 
         return self._conn
 

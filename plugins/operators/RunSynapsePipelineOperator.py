@@ -2,7 +2,7 @@ from airflow.models import BaseOperator
 import requests
 from functools import cached_property
 from hooks.azureSynapseHook import AzureSynapseHook
-
+from typing import TYPE_CHECKING, Any, Sequence
 
 class SynapseRunPipelineOperator(BaseOperator):
     """
@@ -20,11 +20,21 @@ class SynapseRunPipelineOperator(BaseOperator):
         pipeline_name: str,
         azure_synapse_conn_id: str,
         azure_synapse_workspace_dev_endpoint: str,
+        wait_for_termination: bool = True,
+        reference_pipeline_run_id: str | None = None,
+        is_recovery: bool | None = None,
+        start_activity_name: str | None = None,
+        parameters: dict[str, Any] | None = None,
         *args, **kwargs
     ) -> None:
         self.azure_synapse_conn_id = azure_synapse_conn_id
         self.pipeline_name = pipeline_name
         self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
+        self.wait_for_termination = wait_for_termination
+        self.reference_pipeline_run_id = reference_pipeline_run_id
+        self.is_recovery = is_recovery
+        self.start_activity_name = start_activity_name
+        self.parameters = parameters
         super().__init__(*args, **kwargs)
 
     @cached_property
@@ -37,9 +47,16 @@ class SynapseRunPipelineOperator(BaseOperator):
 
     def execute(self, context) -> None:
         self.log.info("Executing the %s pipeline.", self.pipeline_name)
-        response = self.hook.run_pipeline(self.pipeline_name)
+        response = self.hook.run_pipeline(
+            pipeline_name=self.pipeline_name,
+            reference_pipeline_run_id=self.reference_pipeline_run_id,
+            is_recovery=self.is_recovery,
+            start_activity_name=self.start_activity_name,
+            parameters=self.parameters,
+        )
         self.run_id = vars(response)["run_id"]
         # Push the ``run_id`` value to XCom regardless of what happens during execution. This allows for
         # retrieval the executed pipeline's ``run_id`` for downstream tasks especially if performing an
         # asynchronous wait.
         context["ti"].xcom_push(key="run_id", value=self.run_id)
+        

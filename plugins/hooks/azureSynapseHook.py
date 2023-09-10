@@ -56,6 +56,7 @@ class AzureSynapseHook(BaseHook):
     @staticmethod
     def get_ui_field_behaviour() -> dict[str, Any]:
         """Returns custom field behaviour."""
+        
         return {
             "hidden_fields": ["schema", "port", "extra"],
             "relabeling": {"login": "Client ID", "password": "Secret", "host": "Synapse Workspace URL"},

@@ -1,9 +1,8 @@
 from airflow.models import BaseOperator
-import requests
 from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import AzureSynapseHook, AzureSynapsePipelineRunStatus
-from typing import TYPE_CHECKING, Any, Optional, Sequence, Dict
+from typing import Any, Optional, Dict
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
     """
@@ -47,6 +46,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
     @cached_property
     def hook(self):
         """Create and return an AzureSynapseHook (cached)."""
+
         return AzureSynapseHook(
             azure_synapse_conn_id=self.azure_synapse_conn_id,
             azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint
@@ -79,15 +79,6 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                 )
 
                 self.log.info("Pipeline status", response)
-                # if self.hook.wait_for_pipeline_run_status(
-                #     run_id=self.run_id,
-                #     expected_statuses=AzureSynapseSparkBatchRunStatus.SUCCESS,
-                #     check_interval=self.check_interval,
-                #     timeout=self.timeout,
-                #     resource_group_name=self.resource_group_name,
-                #     factory_name=self.factory_name,
-                # ):
-                #     self.log.info("Pipeline run %s has completed successfully.", self.run_id)
 
 
 

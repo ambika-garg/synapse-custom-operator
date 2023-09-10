@@ -120,7 +120,7 @@ class AzureSynapseHook(BaseHook):
         :param pipeline_name: The pipeline name.
         """
      
-        return self.get_conn().create_pipeline_run(pipeline_name)
+        return self.get_conn().pipeline.create_pipeline_run(pipeline_name)
       
 
     def get_conn(self) -> ArtifactsClient:

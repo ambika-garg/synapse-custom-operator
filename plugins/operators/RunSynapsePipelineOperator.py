@@ -3,9 +3,23 @@ from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
     AzureSynapseHook,
-    AzureSynapsePipelineRunStatus,
 )
 from typing import Any, Optional, Dict
+
+#TODO: Move this to hook.py only and import it here.
+class AzureSynapsePipelineRunStatus:
+    """Azure Synapse pipeline operation statuses."""
+
+    QUEUED = "Queued"
+    IN_PROGRESS = "InProgress"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELING = "Canceling"
+    CANCELLED = "Cancelled"
+    TERMINAL_STATUSES = {CANCELLED, FAILED, SUCCEEDED}
+    INTERMEDIATE_STATES = {QUEUED, IN_PROGRESS, CANCELING}
+    FAILURE_STATES = {FAILED, CANCELLED}
+
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
     """

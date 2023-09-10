@@ -3,7 +3,7 @@ from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
     AzureSynapseHook,
-    AzureSynapsePipelineRunStatus
+    AzureSynapsePipelineRunStatus,
 )
 from typing import Any, Optional, Dict
 

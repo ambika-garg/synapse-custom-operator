@@ -3,6 +3,7 @@ import time
 from typing import TYPE_CHECKING, Any, Union
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 import requests
+from azure.synapse.artifacts.models import CreateRunResponse
 # from airflow.exceptions import AirflowTaskTimeout
 from airflow.hooks.base import BaseHook
 from airflow.providers.microsoft.azure.utils import get_field
@@ -44,9 +45,10 @@ class AzureSynapseHook(BaseHook):
             "relabeling": {"login": "Client ID", "password": "Secret", "host": "Synapse Workspace URL"},
         }
 
-    def __init__(self, azure_synapse_conn_id: str = default_conn_name):
+    def __init__(self, azure_synapse_workspace_dev_endpoint: str, azure_synapse_conn_id: str = default_conn_name):
         super().__init__()
         self.conn_id = azure_synapse_conn_id
+        self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
 
     def _get_field(self, extras, name):
         return get_field(
@@ -110,173 +112,41 @@ class AzureSynapseHook(BaseHook):
     def run_pipeline(
         self,
         pipeline_name: str
-    ):
+    ) -> CreateRunResponse:
         """
         Run a Synapse pipeline.
 
+        :param pipeline_name: The pipeline name.
         """
+     
+        return self.get_conn().create_pipeline_run(pipeline_name)
+      
 
-        # job = self.get_conn()
-        # job = PipelineOperations.create_pipeline_run(pipeline_name)
-        # return job
-        # response = self.hook.get_pipeline()
-
-        # if self._conn is not None:
-        #     return self._conn
+    def get_conn(self) -> ArtifactsClient:
+        if self._conn is not None:
+            return self._conn
 
         conn = self.get_connection(self.conn_id)
         extras = conn.extra_dejson
         tenant = self._get_field(extras, "tenantId")
 
-        subscription_id = self._get_field(extras, "subscriptionId")
-        if not subscription_id:
-            raise ValueError("A Subscription ID is required to connect to Azure Synapse.")
-
+        credential: Credentials
         if conn.login is not None and conn.password is not None:
             if not tenant:
                 raise ValueError("A Tenant ID is required when authenticating with Client ID and Secret.")
 
+            credential = ClientSecretCredential(
+                client_id=conn.login, client_secret=conn.password, tenant_id=tenant
+            )
+        else:
+            credential = DefaultAzureCredential()
+        self._conn = self._create_client(credential, self.azure_synapse_workspace_dev_endpoint)
 
-        client = ArtifactsClient(endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net", credential=ClientSecretCredential(
-            client_id=conn.login, client_secret=conn.password, tenant_id=tenant
-        ))
-        run_operations = client.pipeline.create_pipeline_run(pipeline_name)
-        self.log.info("run operations %s", run_operations)
-        return run_operations
+        return self._conn
 
-        # from urllib.parse import quote
-
-        # try:
-        #     conn = self.get_connection(self.conn_id)
-        #     extras = conn.extra_dejson
-        #     tenant_id = self._get_field(extras, "tenantId")
-
-        #     fields = self.__get_fields_from_url(conn.host)
-        #     workspace_name = fields["workspace_name"]
-        #     subscription_id = fields["subscription_id"]
-        #     resource_group = fields["resource_group"]
-
-        #     api_url = f"https://{workspace_name}.dev.azuresynapse.net/pipelines/{pipeline_name}/createRun?api-version=2020-12-01"
-
-        #     auth_token = self.get_auth_token(tenant_id, conn.login, conn.password, workspace_name)
-
-        #     headers = {
-        #         "Authorization": f"Bearer {auth_token}",
-        #         "Content-Type": "application/json"
-        #     }
-        #     response = requests.post(api_url, headers=headers)
-
-        #     workspace_encoded = quote(f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Synapse/workspaces/{workspace_name}", safe='')
-        #     run_id = response.json().get("runId")
-        #     pipeline_run_url = f"https://ms.web.azuresynapse.net/en/monitoring/pipelineruns/{run_id}?workspace={workspace_encoded}"
-        #     return {
-        #         "pipeline_run_url": pipeline_run_url
-        #     }
-
-        # except requests.exceptions.RequestException as e:
-        #     self.log.error(f"Failed to trigger Synapse pipeline: {e}")
-        #     raise
-
-    # def get_conn(self) -> SynapseManagementClient:
-    #     if self._conn is not None:
-    #         return self._conn
-
-    #     conn = self.get_connection(self.conn_id)
-    #     extras = conn.extra_dejson
-    #     tenant = self._get_field(extras, "tenantId")
-    #     spark_pool = self.spark_pool
-    #     livy_api_version = "2022-02-22-preview"
-
-    #     subscription_id = self._get_field(extras, "subscriptionId")
-    #     if not subscription_id:
-    #         raise ValueError("A Subscription ID is required to connect to Azure Synapse.")
-
-    #     credential: Credentials
-    #     if conn.login is not None and conn.password is not None:
-    #         if not tenant:
-    #             raise ValueError("A Tenant ID is required when authenticating with Client ID and Secret.")
-
-    #         credential = ClientSecretCredential(
-    #             client_id=conn.login, client_secret=conn.password, tenant_id=tenant
-    #         )
-    #     else:
-    #         credential = DefaultAzureCredential()
-
-    #     self._conn = self._create_client(credential, conn.host, spark_pool, livy_api_version, subscription_id)
-
-    #     return self._conn
-
-    # @staticmethod
-    # def _create_client(credential: Credentials, subscription_id: str):
-    #     return SynapseManagementClient(
-    #         credential=credential,
-    #         subscription_id=subscription_id,
-    #     )
-
-    # def run_spark_job(
-    #     self,
-    #     payload: SparkBatchJobOptions,
-    # ):
-    #     """
-    #     Run a job in an Apache Spark pool.
-
-    #     :param payload: Livy compatible payload which represents the spark job that a user wants to submit.
-    #     """
-    #     job = self.get_conn().spark_batch.create_spark_batch_job(payload)
-    #     self.job_id = job.id
-    #     return job
-
-    # def get_job_run_status(self):
-    #     """Get the job run status."""
-    #     job_run_status = self.get_conn().spark_batch.get_spark_batch_job(batch_id=self.job_id).state
-    #     return job_run_status
-
-    # def wait_for_job_run_status(
-    #     self,
-    #     job_id: int | None,
-    #     expected_statuses: str | set[str],
-    #     check_interval: int = 60,
-    #     timeout: int = 60 * 60 * 24 * 7,
-    # ) -> bool:
-    #     """
-    #     Waits for a job run to match an expected status.
-
-    #     :param job_id: The job run identifier.
-    #     :param expected_statuses: The desired status(es) to check against a job run's current status.
-    #     :param check_interval: Time in seconds to check on a job run's status.
-    #     :param timeout: Time in seconds to wait for a job to reach a terminal status or the expected
-    #         status.
-
-    #     """
-    #     job_run_status = self.get_job_run_status()
-    #     start_time = time.monotonic()
-
-    #     while (
-    #         job_run_status not in AzureSynapseSparkBatchRunStatus.TERMINAL_STATUSES
-    #         and job_run_status not in expected_statuses
-    #     ):
-    #         # Check if the job-run duration has exceeded the ``timeout`` configured.
-    #         if start_time + timeout < time.monotonic():
-    #             raise AirflowTaskTimeout(
-    #                 f"Job {job_id} has not reached a terminal status after {timeout} seconds."
-    #             )
-
-    #         # Wait to check the status of the job run based on the ``check_interval`` configured.
-    #         self.log.info("Sleeping for %s seconds", check_interval)
-    #         time.sleep(check_interval)
-
-    #         job_run_status = self.get_job_run_status()
-    #         self.log.info("Current spark job run status is %s", job_run_status)
-
-    #     return job_run_status in expected_statuses
-
-    # def cancel_job_run(
-    #     self,
-    #     job_id: int,
-    # ) -> None:
-    #     """
-    #     Cancel the spark job run.
-
-    #     :param job_id: The synapse spark job identifier.
-    #     """
-    #     self.get_conn().spark_batch.cancel_spark_batch_job(job_id)
+    @staticmethod
+    def _create_client(credential: Credentials, endpoint: str):
+        return ArtifactsClient(
+            endpoint=endpoint,
+            credential=credential
+        )

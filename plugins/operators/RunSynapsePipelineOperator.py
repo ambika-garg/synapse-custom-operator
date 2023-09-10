@@ -2,7 +2,7 @@ from airflow.models import BaseOperator
 import requests
 from functools import cached_property
 from hooks.azureSynapseHook import AzureSynapseHook
-from typing import TYPE_CHECKING, Any, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Optional, Sequence, Dict
 
 class SynapseRunPipelineOperator(BaseOperator):
     """
@@ -24,7 +24,7 @@ class SynapseRunPipelineOperator(BaseOperator):
         reference_pipeline_run_id: Optional[str] = None,
         is_recovery: Optional[bool] = None,
         start_activity_name: Optional[str] = None,
-        parameters: Optional[dict[str, Any]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
         *args, **kwargs
     ) -> None:
         self.azure_synapse_conn_id = azure_synapse_conn_id

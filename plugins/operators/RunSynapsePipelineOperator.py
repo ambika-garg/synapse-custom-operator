@@ -77,8 +77,6 @@ class SynapseRunPipelineOperator(BaseOperator):
                     # expected_statuses=AzureSynapseSparkBatchRunStatus.SUCCESS,
                     check_interval=self.check_interval,
                     timeout=self.timeout,
-                    resource_group_name=self.resource_group_name,
-                    factory_name=self.factory_name,
                 )
 
                 self.log.info("Pipeline status", response)

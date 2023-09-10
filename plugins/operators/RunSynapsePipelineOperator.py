@@ -2,7 +2,7 @@ from airflow.models import BaseOperator
 import requests
 from functools import cached_property
 from hooks.azureSynapseHook import AzureSynapseHook
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any, Optional, Sequence
 
 class SynapseRunPipelineOperator(BaseOperator):
     """
@@ -21,10 +21,10 @@ class SynapseRunPipelineOperator(BaseOperator):
         azure_synapse_conn_id: str,
         azure_synapse_workspace_dev_endpoint: str,
         wait_for_termination: bool = True,
-        reference_pipeline_run_id: str | None = None,
-        is_recovery: bool | None = None,
-        start_activity_name: str | None = None,
-        parameters: dict[str, Any] | None = None,
+        reference_pipeline_run_id: Optional[str] = None,
+        is_recovery: Optional[bool] = None,
+        start_activity_name: Optional[str] = None,
+        parameters: Optional[dict[str, Any]] = None,
         *args, **kwargs
     ) -> None:
         self.azure_synapse_conn_id = azure_synapse_conn_id
@@ -59,4 +59,4 @@ class SynapseRunPipelineOperator(BaseOperator):
         # retrieval the executed pipeline's ``run_id`` for downstream tasks especially if performing an
         # asynchronous wait.
         context["ti"].xcom_push(key="run_id", value=self.run_id)
-        
+

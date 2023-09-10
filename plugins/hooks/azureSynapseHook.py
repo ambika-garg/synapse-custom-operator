@@ -119,7 +119,7 @@ class AzureSynapseHook(BaseHook):
 
         :param pipeline_name: The pipeline name.
         """
-     
+        self.log.info("Azure Synapse workspace development url: %s", self.azure_synapse_workspace_dev_endpoint)
         return self.get_conn().pipeline.create_pipeline_run(pipeline_name)
       
 

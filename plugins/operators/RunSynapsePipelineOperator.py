@@ -5,7 +5,7 @@ from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
     AzureSynapseHook,
-    AzureSynapsePipelineRunException,
+    # AzureSynapsePipelineRunException,
 )
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict

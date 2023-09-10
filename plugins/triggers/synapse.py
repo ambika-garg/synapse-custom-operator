@@ -5,6 +5,7 @@ from airflow.triggers.base import BaseTrigger, TriggerEvent
 from typing import Any, AsyncIterator
 from hooks.azureSynapseHook import AzureSynapseAsyncHook, AzureSynapsePipelineRunStatus
 
+
 class AzureSynapseTrigger(BaseTrigger):
     # TODO: Add documentation.
 
@@ -22,7 +23,7 @@ class AzureSynapseTrigger(BaseTrigger):
         self.run_id = run_id
         self.wait_for_termination = wait_for_termination
         self.end_time = end_time
-    
+
     def serialize(self) -> tuple[str, dict[str, Any]]:
         """Serializes AzureSynapseTrigger arguments and classpath."""
 
@@ -36,11 +37,12 @@ class AzureSynapseTrigger(BaseTrigger):
                 "end_time": self.end_time,
             },
         )
-    
+
     async def run(self) -> AsyncIterator[TriggerEvent]:
         """Make async connection to Azure Synapse, polls for the pipeline run status"""
 
-        hook = AzureSynapseAsyncHook(azure_synapse_conn_id=self.azure_synapse_conn_id)
+        hook = AzureSynapseAsyncHook(
+            azure_synapse_conn_id=self.azure_synapse_conn_id)
 
         try:
             if self.wait_for_termination:
@@ -105,7 +107,8 @@ class AzureSynapseTrigger(BaseTrigger):
                     await hook.cancel_pipeline_run(
                         run_id=self.run_id
                     )
-                    self.log.info("Unexpected error %s caught. Cancel pipeline run %s", e, self.run_id)
+                    self.log.info(
+                        "Unexpected error %s caught. Cancel pipeline run %s", e, self.run_id)
                 except Exception as err:
                     yield TriggerEvent({"status": "error", "message": str(err), "run_id": self.run_id})
             yield TriggerEvent({"status": "error", "message": str(e), "run_id": self.run_id})

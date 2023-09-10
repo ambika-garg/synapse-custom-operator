@@ -7,6 +7,7 @@ from hooks.azureSynapseHook import (
     AzureSynapseHook,
     AzureSynapsePipelineRunException,
 )
+from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict
 
 #TODO: Move this to hook.py only and import it here.
@@ -23,6 +24,9 @@ class AzureSynapsePipelineRunStatus:
     INTERMEDIATE_STATES = {QUEUED, IN_PROGRESS, CANCELING}
     FAILURE_STATES = {FAILED, CANCELLED}
 
+#TODO: Move this to hook.py only and import it here.
+class AzureSynapsePipelineRunException(AirflowException):
+    """An exception that indicates a pipeline run failed to complete."""
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
     """

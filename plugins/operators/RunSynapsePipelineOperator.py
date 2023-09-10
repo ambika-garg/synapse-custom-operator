@@ -32,7 +32,7 @@ class SynapseRunPipelineOperator(BaseOperator):
         """Create and return an AzureSynapseHook (cached)."""
         return AzureSynapseHook(
             azure_synapse_conn_id=self.azure_synapse_conn_id,
-            azure_synapse_workspace_dev_endpoint=self. azure_synapse_workspace_dev_endpoint
+            azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint
         )
 
     def execute(self, context) -> None:

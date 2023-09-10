@@ -37,7 +37,6 @@ class SynapseRunPipelineOperator(BaseOperator):
 
     def execute(self, context) -> None:
         self.log.info("Executing the %s pipeline.", self.pipeline_name)
-        self.log.info("Azure Synapse workspace development url in Operator: %s", self.azure_synapse_workspace_dev_endpoint)
         response = self.hook.run_pipeline(self.pipeline_name)
         self.run_id = vars(response)["run_id"]
         # Push the ``run_id`` value to XCom regardless of what happens during execution. This allows for

@@ -1,7 +1,8 @@
 from airflow.models import BaseOperator
 from airflow.configuration import conf
 from functools import cached_property
-from hooks.azureSynapseHook import AzureSynapseHook, AzureSynapsePipelineRunStatus
+from hooks.azureSynapseHook import AzureSynapseHook
+from hooks.azureSynapseHook import AzureSynapsePipelineRunStatus
 from typing import Any, Optional, Dict
 
 class AzureSynapseRunPipelineOperator(BaseOperator):

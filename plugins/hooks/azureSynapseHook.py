@@ -140,8 +140,8 @@ class AzureSynapseHook(BaseHook):
         client = ArtifactsClient(endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net", credential=ClientSecretCredential(
             client_id=conn.login, client_secret=conn.password, tenant_id=tenant
         ))
-        run_operations = client.pipeline.get_pipeline(pipeline_name)
-        self.log.info("run operations", run_operations)
+        run_operations = client.pipeline.create_pipeline_run(pipeline_name)
+        self.log.info("run operations %s", run_operations)
         return run_operations
 
         # from urllib.parse import quote

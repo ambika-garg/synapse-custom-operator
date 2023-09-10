@@ -31,10 +31,11 @@ class SynapseRunPipelineOperator(BaseOperator):
     def execute(self, context) -> None:
         self.log.info("Executing the %s pipeline.", self.pipeline_name)
         response = self.hook.run_pipeline(self.pipeline_name)
-        self.pipeline_run_url = response["pipeline_run_url"]
+        self.log.info("response %s", response)
+        # self.pipeline_run_url = response["pipeline_run_url"]
 
         # Push the ``pipeline_run_url`` value to XCom regardless of what happens during execution. This allows for
         # retrieval the executed pipeline's ``url`` for downstream tasks especially if performing an
         # asynchronous wait.
-        context["ti"].xcom_push(key="pipeline_run_url", value=self.pipeline_run_url)
+        # context["ti"].xcom_push(key="pipeline_run_url", value=self.pipeline_run_url)
 

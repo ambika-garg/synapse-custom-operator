@@ -8,24 +8,25 @@ from azure.synapse.artifacts.models import CreateRunResponse, PipelineRun
 from airflow.hooks.base import BaseHook
 from airflow.providers.microsoft.azure.utils import get_field
 from azure.synapse.artifacts import ArtifactsClient
+from airflow.exceptions import AirflowException, AirflowProviderDeprecationWarning
 
 Credentials = Union[ClientSecretCredential, DefaultAzureCredential]
 
-class AzureSynapseSparkBatchRunStatus:
-    """Azure Synapse Spark Job operation statuses."""
+class AzureSynapsePipelineRunStatus:
+    """Azure Synapse pipeline operation statuses."""
 
-    NOT_STARTED = "not_started"
-    STARTING = "starting"
-    RUNNING = "running"
-    IDLE = "idle"
-    BUSY = "busy"
-    SHUTTING_DOWN = "shutting_down"
-    ERROR = "error"
-    DEAD = "dead"
-    KILLED = "killed"
-    SUCCESS = "success"
+    QUEUED = "Queued"
+    IN_PROGRESS = "InProgress"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELING = "Canceling"
+    CANCELLED = "Cancelled"
+    TERMINAL_STATUSES = {CANCELLED, FAILED, SUCCEEDED}
+    INTERMEDIATE_STATES = {QUEUED, IN_PROGRESS, CANCELING}
+    FAILURE_STATES = {FAILED, CANCELLED}
 
-    TERMINAL_STATUSES = {SUCCESS, DEAD, KILLED, ERROR}
+class AzureSynapsePipelineRunException(AirflowException):
+    """An exception that indicates a pipeline run failed to complete."""
 
 class AzureSynapseHook(BaseHook):
     """
@@ -164,7 +165,6 @@ class AzureSynapseHook(BaseHook):
         """
 
         return self.get_conn().pipeline_run.get_pipeline_run(run_id=run_id)
-        # .get(resource_group_name, factory_name, run_id, **config)
 
     def get_pipeline_run_status(
         self,
@@ -188,7 +188,7 @@ class AzureSynapseHook(BaseHook):
     def wait_for_pipeline_run_status(
         self,
         run_id: str,
-        # expected_statuses: str | set[str],
+        expected_statuses: str | set[str],
         check_interval: int = 60,
         timeout: int = 60 * 60 * 24 * 7,
     ) -> bool:
@@ -205,4 +205,27 @@ class AzureSynapseHook(BaseHook):
         """
 
         pipeline_run_status = self.get_pipeline_run_status(run_id = run_id)
-        return pipeline_run_status
+
+        start_time = time.monotonic()
+
+        while(
+            pipeline_run_status not in AzureSynapsePipelineRunStatus.TERMINAL_STATUSES
+            and pipeline_run_status not in expected_statuses
+        ):
+            if start_time + timeout < time.monotonic():
+                raise AzureSynapsePipelineRunException(
+                    f"Pipeline run {run_id} has not reached a terminal status after {timeout} seconds."
+                )
+        
+            # Wait to check the status of the pipeline run based on the ``check_interval`` configured.
+            time.sleep(check_interval)
+
+            # try:
+            pipeline_run_status = self.get_pipeline_run_status(run_id=run_id)
+            # except ServiceRequestError:
+            #     if executed_after_token_refresh:
+            #         self.refresh_conn()
+            #     else:
+            #         raise
+
+        return pipeline_run_status in expected_statuses

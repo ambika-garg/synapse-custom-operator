@@ -2,7 +2,7 @@ from __future__ import annotations
 import datetime
 import pendulum
 from airflow import DAG
-from operators.RunSynapsePipelineOperator import SynapseRunPipelineOperator
+from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
 
 with DAG(
     dag_id="AzureSynapseRunPipelineDag",
@@ -13,7 +13,7 @@ with DAG(
     tags=["pipeline"],
 ) as dag: 
     
-    trigger_synapse_pipeline = SynapseRunPipelineOperator(
+    trigger_synapse_pipeline = AzureSynapseRunPipelineOperator(
         azure_synapse_conn_id="azure_synapse_connection",
         task_id="trigger_synapse_pipeline",
         pipeline_name="Pipeline 1",

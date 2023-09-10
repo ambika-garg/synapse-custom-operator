@@ -11,6 +11,21 @@ from azure.synapse.artifacts import ArtifactsClient
 
 Credentials = Union[ClientSecretCredential, DefaultAzureCredential]
 
+class AzureSynapseSparkBatchRunStatus:
+    """Azure Synapse Spark Job operation statuses."""
+
+    NOT_STARTED = "not_started"
+    STARTING = "starting"
+    RUNNING = "running"
+    IDLE = "idle"
+    BUSY = "busy"
+    SHUTTING_DOWN = "shutting_down"
+    ERROR = "error"
+    DEAD = "dead"
+    KILLED = "killed"
+    SUCCESS = "success"
+
+    TERMINAL_STATUSES = {SUCCESS, DEAD, KILLED, ERROR}
 
 class AzureSynapseHook(BaseHook):
     """
@@ -88,28 +103,6 @@ class AzureSynapseHook(BaseHook):
         except:
             self.log.error("No segment found in the workspace URL.")
 
-    def get_auth_token(self, tenant_id, client_id, client_secret, workspace_name):
-
-        try:
-            url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/token"
-            payload = {
-                'client_id': client_id,
-                'client_secret': client_secret,
-                'grant_type': 'client_credentials',
-                'resource': 'https://dev.azuresynapse.net',
-                'scope': f'workspaces/{workspace_name}/*.'
-            }
-            headers = {
-                'accept': 'application/json',
-            }
-
-            response = requests.request(
-                "POST", url, headers=headers, data=payload)
-            return response.json()["access_token"]
-
-        except requests.exceptions.RequestException as e:
-            self.log.error(f"Failed to authenticate: {e}")
-
     def run_pipeline(
         self,
         pipeline_name: str,
@@ -154,3 +147,25 @@ class AzureSynapseHook(BaseHook):
             endpoint=endpoint,
             credential=credential
         )
+    
+    def wait_for_pipeline_run_status(
+        self,
+        run_id: str,
+        expected_statuses: str | set[str],
+        check_interval: int = 60,
+        timeout: int = 60 * 60 * 24 * 7,
+    ) -> bool:
+        """
+        Waits for a pipeline run to match an expected status.
+
+        :param run_id: The pipeline run identifier.
+        :param expected_statuses: The desired status(es) to check against a pipeline run's current status.
+        :param check_interval: Time in seconds to check on a pipeline run's status.
+        :param timeout: Time in seconds to wait for a pipeline to reach a terminal status or the expected
+            status.
+        
+        :return: Boolean indicating if the pipeline run has reached the ``expected_status``.
+        """
+
+        pipeline_run_status = self.get_pipeline_run(run_id = run_id)
+        return pipeline_run_status

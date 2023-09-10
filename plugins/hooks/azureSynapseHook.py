@@ -2,15 +2,24 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any, Union
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
-import requests
+from asgiref.sync import sync_to_async
 from azure.synapse.artifacts.models import CreateRunResponse, PipelineRun
 # from airflow.exceptions import AirflowTaskTimeout
+from azure.core.exceptions import ServiceRequestError
 from airflow.hooks.base import BaseHook
 from airflow.providers.microsoft.azure.utils import get_field
 from azure.synapse.artifacts import ArtifactsClient
+from azure.synapse.artifacts.aio import ArtifactsClient as AsyncArtifactsClient
+from azure.identity.aio import (
+    ClientSecretCredential as AsyncClientSecretCredential,
+    DefaultAzureCredential as AsyncDefaultAzureCredential,
+)
 from airflow.exceptions import AirflowException, AirflowProviderDeprecationWarning
 
 Credentials = Union[ClientSecretCredential, DefaultAzureCredential]
+AsyncCredentials = Union[AsyncClientSecretCredential,
+                         AsyncDefaultAzureCredential]
+
 
 class AzureSynapsePipelineRunStatus:
     """Azure Synapse pipeline operation statuses."""
@@ -25,8 +34,10 @@ class AzureSynapsePipelineRunStatus:
     INTERMEDIATE_STATES = {QUEUED, IN_PROGRESS, CANCELING}
     FAILURE_STATES = {FAILED, CANCELLED}
 
+
 class AzureSynapsePipelineRunException(AirflowException):
     """An exception that indicates a pipeline run failed to complete."""
+
 
 class AzureSynapseHook(BaseHook):
     """
@@ -56,7 +67,7 @@ class AzureSynapseHook(BaseHook):
     @staticmethod
     def get_ui_field_behaviour() -> dict[str, Any]:
         """Returns custom field behaviour."""
-        
+
         return {
             "hidden_fields": ["schema", "port", "extra"],
             "relabeling": {"login": "Client ID", "password": "Secret", "host": "Synapse Workspace URL"},
@@ -117,9 +128,8 @@ class AzureSynapseHook(BaseHook):
         :param config: Extra parameters for the Synapse Artifact Client.
         :return: The pipeline run Id.
         """
-        
+
         return self.get_conn().pipeline.create_pipeline_run(pipeline_name, **config)
-      
 
     def get_conn(self) -> ArtifactsClient:
         if self._conn is not None:
@@ -132,14 +142,16 @@ class AzureSynapseHook(BaseHook):
         credential: Credentials
         if conn.login is not None and conn.password is not None:
             if not tenant:
-                raise ValueError("A Tenant ID is required when authenticating with Client ID and Secret.")
+                raise ValueError(
+                    "A Tenant ID is required when authenticating with Client ID and Secret.")
 
             credential = ClientSecretCredential(
                 client_id=conn.login, client_secret=conn.password, tenant_id=tenant
             )
         else:
             credential = DefaultAzureCredential()
-        self._conn = self._create_client(credential, self.azure_synapse_workspace_dev_endpoint)
+        self._conn = self._create_client(
+            credential, self.azure_synapse_workspace_dev_endpoint)
 
         return self._conn
 
@@ -149,7 +161,7 @@ class AzureSynapseHook(BaseHook):
             endpoint=endpoint,
             credential=credential
         )
-    
+
     def get_pipeline_run(
         self,
         run_id: str,
@@ -182,9 +194,14 @@ class AzureSynapseHook(BaseHook):
         pipeline_run_status = self.get_pipeline_run(
             run_id=run_id,
         ).status
-        self.log.info("Current status of pipeline run %s: %s", run_id, pipeline_run_status)
+        self.log.info("Current status of pipeline run %s: %s",
+                      run_id, pipeline_run_status)
 
         return pipeline_run_status
+
+    def refresh_conn(self) -> ArtifactsClient:
+        self._conn = None
+        return self.get_conn()
 
     def wait_for_pipeline_run_status(
         self,
@@ -201,15 +218,15 @@ class AzureSynapseHook(BaseHook):
         :param check_interval: Time in seconds to check on a pipeline run's status.
         :param timeout: Time in seconds to wait for a pipeline to reach a terminal status or the expected
             status.
-        
+
         :return: Boolean indicating if the pipeline run has reached the ``expected_status``.
         """
 
-        pipeline_run_status = self.get_pipeline_run_status(run_id = run_id)
-
+        pipeline_run_status = self.get_pipeline_run_status(run_id=run_id)
+        executed_after_token_refresh = True
         start_time = time.monotonic()
 
-        while(
+        while (
             pipeline_run_status not in AzureSynapsePipelineRunStatus.TERMINAL_STATUSES
             and pipeline_run_status not in expected_statuses
         ):
@@ -217,16 +234,107 @@ class AzureSynapseHook(BaseHook):
                 raise AzureSynapsePipelineRunException(
                     f"Pipeline run {run_id} has not reached a terminal status after {timeout} seconds."
                 )
-        
+
             # Wait to check the status of the pipeline run based on the ``check_interval`` configured.
             time.sleep(check_interval)
 
-            # try:
-            pipeline_run_status = self.get_pipeline_run_status(run_id=run_id)
-            # except ServiceRequestError:
-            #     if executed_after_token_refresh:
-            #         self.refresh_conn()
-            #     else:
-            #         raise
+            try:
+                pipeline_run_status = self.get_pipeline_run_status(
+                    run_id=run_id)
+                executed_after_token_refresh = True
+            except ServiceRequestError:
+                if executed_after_token_refresh:
+                    self.refresh_conn()
+                else:
+                    raise
 
         return pipeline_run_status in expected_statuses
+
+
+class AzureSynapseAsyncHook(AzureSynapseHook):
+    """
+    An Async hook that connects to Azure Synapse to perform pipeline operations.
+
+    :param azure_synapse_conn_id:  The :ref:`Azure Synapse connection id<howto/connection:synapse>`.
+    """
+
+    default_conn_name: str = "azure_synapse_default"
+
+    def __init__(self, azure_synapse_conn_id: str = default_conn_name):
+        self._async_conn: AsyncArtifactsClient = None
+        super.__init__()
+
+    async def get_async_conn(self) -> AsyncArtifactsClient:
+        """Get async connection and connects to azure synapse"""
+
+        if self._async_conn is not None:
+            return self._async_conn
+
+        conn = await sync_to_async(self.get_connection)(self.conn_id)
+        extras = conn.extra_dejson
+        tenant = get_field(extras, "tenantId")
+
+        credential: AsyncCredentials
+        if conn.login is not None and conn.password is not None:
+            if not tenant:
+                raise ValueError(
+                    "A Tenant ID is required when authenticating with Client ID and Secret.")
+
+            credential = AsyncClientSecretCredential(
+                client_id=conn.login, client_secret=conn.password, tenant_id=tenant
+            )
+        else:
+            credential = AsyncDefaultAzureCredential()
+
+        self._async_conn = AsyncArtifactsClient(
+            endpoint=self.azure_synapse_workspace_dev_endpoint,
+            credential=credential
+        )
+
+        return self._async_conn
+
+    async def refresh_conn(self) -> AsyncArtifactsClient:
+        self._conn = None
+        return await self.get_async_conn()
+
+    async def get_azure_pipeline_run_status(
+        self,
+        run_id: str
+    ) -> str:
+        """
+        Connect to Azure Synapse asynchronously and get the pipeline status by run_id.
+
+        :param run_id: The pipeline run identifier.
+
+        :returns: The pipeline status.
+        """
+
+        pipeline_run = await self.get_pipeline_run(
+            run_id=run_id,
+        )
+        status: str = pipeline_run.status
+        return status
+
+    async def get_pipeline_run(
+        self,
+        run_id: str,
+    ) -> PipelineRun:
+        """
+        Connect to Azure Data Factory asynchronously to get the pipeline run details by run id.
+
+        :param run_id: The pipeline run identifier.
+
+        """
+
+        client = await self.get_async_conn()
+        pipeline_run = await client.pipeline_run.get_pipeline_run(run_id=run_id)
+        return pipeline_run
+
+    async def cancel_pipeline_run(self, run_id) -> None:
+        """
+        Cancel a pipeline run by its run ID.
+
+        :param run_id: The pipeline run ID.
+        """
+        client = await self.get_async_conn()
+        await client.cancel_pipeline_run(run_id=run_id)

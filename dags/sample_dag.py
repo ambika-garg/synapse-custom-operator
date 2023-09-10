@@ -11,8 +11,8 @@ with DAG(
     catchup=False,
     dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["pipeline"],
-) as dag: 
-    
+) as dag:
+
     trigger_synapse_pipeline = AzureSynapseRunPipelineOperator(
         azure_synapse_conn_id="azure_synapse_connection",
         task_id="trigger_synapse_pipeline",

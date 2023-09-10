@@ -46,9 +46,10 @@ class AzureSynapseHook(BaseHook):
         }
 
     def __init__(self, azure_synapse_workspace_dev_endpoint: str, azure_synapse_conn_id: str = default_conn_name):
-        super().__init__()
+        self._conn: ArtifactsClient = None
         self.conn_id = azure_synapse_conn_id
         self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
+        super().__init__()
 
     def _get_field(self, extras, name):
         return get_field(

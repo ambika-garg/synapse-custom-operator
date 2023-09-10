@@ -40,6 +40,9 @@ class SynapseRunPipelineOperator(BaseOperator):
         self.is_recovery = is_recovery
         self.start_activity_name = start_activity_name
         self.parameters = parameters
+        self.timeout = timeout 
+        self.check_interval = check_interval 
+        self.deferrable = deferrable 
         super().__init__(*args, **kwargs)
 
     @cached_property

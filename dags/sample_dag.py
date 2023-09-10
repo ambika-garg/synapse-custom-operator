@@ -15,9 +15,9 @@ with DAG(
     
     trigger_synapse_pipeline = SynapseRunPipelineOperator(
         azure_synapse_conn_id="azure_synapse_connection",
-        task_id='trigger_synapse_pipeline',
-        pipeline_name='Pipeline 1',
-        azure_synapse_workspace_dev_endpoint='https://ambika-synapse-workspace.dev.azuresynapse.net'
+        task_id="trigger_synapse_pipeline",
+        pipeline_name="Pipeline 1",
+        azure_synapse_workspace_dev_endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net"
     )
 
     trigger_synapse_pipeline

@@ -141,7 +141,7 @@ class AzureSynapseHook(BaseHook):
             )
         else:
             credential = DefaultAzureCredential()
-        self._conn = self._create_client(credential, self.azure_synapse_workspace_dev_endpoint)
+        self._conn = self._create_client(credential, "https://ambika-synapse-workspace.dev.azuresynapse.net")
 
         return self._conn
 

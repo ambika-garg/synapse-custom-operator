@@ -151,7 +151,7 @@ class AzureSynapseHook(BaseHook):
     def wait_for_pipeline_run_status(
         self,
         run_id: str,
-        expected_statuses: str | set[str],
+        # expected_statuses: str | set[str],
         check_interval: int = 60,
         timeout: int = 60 * 60 * 24 * 7,
     ) -> bool:

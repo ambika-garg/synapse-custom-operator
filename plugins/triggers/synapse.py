@@ -5,7 +5,8 @@ sys.path.insert(0,"..")
 from azure.core.exceptions import ServiceRequestError
 from airflow.triggers.base import BaseTrigger, TriggerEvent
 from typing import Any, AsyncIterator
-from hooks.azureSynapseHook import AzureSynapseAsyncHook, AzureSynapsePipelineRunStatus
+from hooks.azureSynapseHook import *
+# from hooks.azureSynapseHook import AzureSynapseAsyncHook, AzureSynapsePipelineRunStatus
 
 class AzureSynapseTrigger(BaseTrigger):
     # TODO: Add documentation.

@@ -1,7 +1,5 @@
 import time
 import asyncio
-import sys
-sys.path.insert(0,"..")
 from azure.core.exceptions import ServiceRequestError
 from airflow.triggers.base import BaseTrigger, TriggerEvent
 from typing import Any, AsyncIterator, Dict, Tuple
@@ -43,11 +41,15 @@ class AzureSynapseTrigger(BaseTrigger):
     async def run(self) -> AsyncIterator[TriggerEvent]:
         """Make async connection to Azure Synapse, polls for the pipeline run status"""
 
+        self.log.info("In the trigger run")
+
         hook = AzureSynapseAsyncHook(
             azure_synapse_conn_id=self.azure_synapse_conn_id)
 
         try:
             if self.wait_for_termination:
+                self.log.info("End time: %s, Current time: %s", self.end_time, time.time())
+
                 while self.end_time > time.time():
                     try:
                         pipeline_status = await hook.get_azure_pipeline_run_status(

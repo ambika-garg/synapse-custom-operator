@@ -39,10 +39,24 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
     """
     Executes a Synapse Pipeline.
 
-    :param workspace_name: The name of the Azure Synapse workspace.
     :param pipeline_name: The name of the pipeline to execute.
     :param azure_synapse_conn_id: The Airflow connection ID for Azure Synapse.
-    :param spark_pool: The name of the Spark pool (optional).
+    :param azure_synapse_workspace_dev_endpoint: The Azure Synapse workspace development endpoint.
+    :param wait_for_termination: Flag to wait on a pipeline run's termination. // TODO: Complete it. 
+    :param reference_pipeline_run_id: The pipeline run identifier. If this run ID is specified the parameters
+        of the specified run will be used to create a new run.
+    :param is_recovery: Recovery mode flag. If recovery mode is set to `True`, the specified referenced
+        pipeline run and the new run will be grouped under the same ``groupId``.
+    :param start_activity_name: In recovery mode, the rerun will start from this activity. If not specified,
+        all activities will run.
+    :param parameters: Parameters of the pipeline run. These parameters are referenced in a pipeline via
+        ``@pipeline().parameters.parameterName`` and will be used only if the ``reference_pipeline_run_id`` is
+        not specified.
+    :param timeout: Time in seconds to wait for a pipeline to reach a terminal status for non-asynchronous
+        waits. Used only if ``wait_for_termination`` is True.
+    :param check_interval: Time in seconds to check on a pipeline run's status for non-asynchronous waits.
+        Used only if ``wait_for_termination`` is True.
+    :param deferrable: Run operator in deferrable mode.
 
     """
 

@@ -250,6 +250,17 @@ class AzureSynapseHook(BaseHook):
 
         return pipeline_run_status in expected_statuses
 
+    def cancel_run_pipeline(
+        self,
+        run_id: str
+    ) -> None:
+        """
+        Cancel the pipeline run.
+
+        :param run_id: The pipeline run identifier.
+        """
+         
+        self.get_conn().pipeline_run.cancel_pipeline_run(run_id)
 
 class AzureSynapseAsyncHook(AzureSynapseHook):
     """

@@ -8,10 +8,12 @@ from hooks.azureSynapseHook import (
     # AzureSynapsePipelineRunException,
 )
 from airflow.exceptions import AirflowException
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, TYPE_CHECKING
 
 from triggers.synapse import AzureSynapseTrigger
-
+if TYPE_CHECKING:
+    from airflow.models.taskinstancekey import TaskInstanceKey
+    from airflow.utils.context import Context
 # TODO: Move this to hook.py only and import it here.
 
 
@@ -29,8 +31,6 @@ class AzureSynapsePipelineRunStatus:
     FAILURE_STATES = {FAILED, CANCELLED}
 
 # TODO: Move this to hook.py only and import it here.
-
-
 class AzureSynapsePipelineRunException(AirflowException):
     """An exception that indicates a pipeline run failed to complete."""
 
@@ -119,7 +119,8 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
             else:
                 end_time = time.time() + self.timeout
                 pipeline_run_status = self.hook.get_pipeline_run_status(
-                    run_id=self.run_id)
+                    run_id=self.run_id
+                )
                 if pipeline_run_status not in AzureSynapsePipelineRunStatus.TERMINAL_STATUSES:
                     self.defer(
                         timeout=self.execution_timeout,
@@ -145,3 +146,33 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                     "Argument `wait_for_termination` is False and `deferrable` is True , hence "
                     "`deferrable` parameter doesn't have any effect",
                 )
+
+    def execute_complete(self, context: Context, event: dict[str, str]) -> None:
+        """
+        Callback for when the trigger fires - returns immediately.
+
+        Relies on trigger to throw an exception, otherwise it assumes execution was successful.
+        """
+        if event:
+            if event["status"] == "error":
+                raise AirflowException(event["message"])
+            self.log.info(event["message"])
+
+    def on_kill(self) -> None:
+        if self.run_id:
+            self.hook.cancel_pipeline_run(
+                run_id=self.run_id,
+                resource_group_name=self.resource_group_name,
+                factory_name=self.factory_name,
+            )
+
+            # Check to ensure the pipeline run was cancelled as expected.
+            if self.hook.wait_for_pipeline_run_status(
+                run_id=self.run_id,
+                expected_statuses=AzureSynapsePipelineRunStatus.CANCELLED,
+                check_interval=self.check_interval,
+                timeout=self.timeout,
+            ):
+                self.log.info("Pipeline run %s has been cancelled successfully.", self.run_id)
+            else:
+                raise AzureSynapsePipelineRunException(f"Pipeline run {self.run_id} was not cancelled.")

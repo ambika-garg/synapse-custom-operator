@@ -147,7 +147,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                     "`deferrable` parameter doesn't have any effect",
                 )
 
-    def execute_complete(self, context: Context, event: dict[str, str]) -> None:
+    def execute_complete(self, event: Dict[str, str]) -> None:
         """
         Callback for when the trigger fires - returns immediately.
 

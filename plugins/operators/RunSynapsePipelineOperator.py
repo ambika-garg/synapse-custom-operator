@@ -34,7 +34,6 @@ class AzureSynapsePipelineRunStatus:
 class AzureSynapsePipelineRunException(AirflowException):
     """An exception that indicates a pipeline run failed to complete."""
 
-
 class AzureSynapseRunPipelineOperator(BaseOperator):
     """
     Executes a Synapse Pipeline.

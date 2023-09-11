@@ -17,9 +17,7 @@ from azure.identity.aio import (
 from airflow.exceptions import AirflowException, AirflowProviderDeprecationWarning
 
 Credentials = Union[ClientSecretCredential, DefaultAzureCredential]
-AsyncCredentials = Union[AsyncClientSecretCredential,
-                         AsyncDefaultAzureCredential]
-
+AsyncCredentials = Union[AsyncClientSecretCredential, AsyncDefaultAzureCredential]
 
 class AzureSynapsePipelineRunStatus:
     """Azure Synapse pipeline operation statuses."""
@@ -34,10 +32,8 @@ class AzureSynapsePipelineRunStatus:
     INTERMEDIATE_STATES = {QUEUED, IN_PROGRESS, CANCELING}
     FAILURE_STATES = {FAILED, CANCELLED}
 
-
 class AzureSynapsePipelineRunException(AirflowException):
     """An exception that indicates a pipeline run failed to complete."""
-
 
 class AzureSynapseHook(BaseHook):
     """

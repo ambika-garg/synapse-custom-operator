@@ -10,7 +10,7 @@ from hooks.azureSynapseHook import (
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict, TYPE_CHECKING
 
-from operators.synapseTrigger import AzureSynapseTrigger
+from triggers.synapse import AzureSynapseTrigger
 if TYPE_CHECKING:
     from airflow.models.taskinstancekey import TaskInstanceKey
     from airflow.utils.context import Context

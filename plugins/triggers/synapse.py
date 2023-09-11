@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0,"..")
 from azure.core.exceptions import ServiceRequestError
 from airflow.triggers.base import BaseTrigger, TriggerEvent
-from typing import Any, AsyncIterator, Dict
+from typing import Any, AsyncIterator, Dict, Tuple
 from hooks.azureSynapseHook import *
 # from hooks.azureSynapseHook import AzureSynapseAsyncHook, AzureSynapsePipelineRunStatus
 
@@ -26,7 +26,7 @@ class AzureSynapseTrigger(BaseTrigger):
         self.wait_for_termination = wait_for_termination
         self.end_time = end_time
 
-    def serialize(self) -> tuple[str, Dict[str, Any]]:
+    def serialize(self) -> Tuple[str, Dict[str, Any]]:
         """Serializes AzureSynapseTrigger arguments and classpath."""
 
         return (

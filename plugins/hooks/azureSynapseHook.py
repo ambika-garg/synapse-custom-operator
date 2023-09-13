@@ -269,7 +269,8 @@ class AzureSynapseAsyncHook(AzureSynapseHook):
 
     def __init__(self, azure_synapse_conn_id: str = default_conn_name):
         self._async_conn: AsyncArtifactsClient = None
-        super.__init__()
+        self.conn_id = azure_synapse_conn_id
+        super.__init__(azure_synapse_conn_id=azure_synapse_conn_id)
 
     async def get_async_conn(self) -> AsyncArtifactsClient:
         """Get async connection and connects to azure synapse"""

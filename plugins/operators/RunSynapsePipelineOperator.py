@@ -139,6 +139,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                         timeout=self.execution_timeout,
                         trigger=AzureSynapseTrigger(
                             azure_synapse_conn_id=self.azure_synapse_conn_id,
+                            azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint,
                             run_id=self.run_id,
                             wait_for_termination=self.wait_for_termination,
                             check_interval=self.check_interval,

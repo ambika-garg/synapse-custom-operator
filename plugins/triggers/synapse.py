@@ -6,6 +6,7 @@ from typing import Any, AsyncIterator, Dict, Tuple
 from hooks.azureSynapseHook import *
 # from hooks.azureSynapseHook import AzureSynapseAsyncHook, AzureSynapsePipelineRunStatus
 
+
 class AzureSynapseTrigger(BaseTrigger):
     # TODO: Add documentation.
 
@@ -13,12 +14,14 @@ class AzureSynapseTrigger(BaseTrigger):
         self,
         run_id: str,
         azure_synapse_conn_id: str,
+        azure_synapse_workspace_dev_endpoint: str,
         end_time: float,
         wait_for_termination: bool = True,
         check_interval: int = 60,
     ):
         super().__init__()
         self.azure_synapse_conn_id = azure_synapse_conn_id
+        self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
         self.check_interval = check_interval
         self.run_id = run_id
         self.wait_for_termination = wait_for_termination
@@ -44,11 +47,14 @@ class AzureSynapseTrigger(BaseTrigger):
         self.log.info("In the trigger run")
 
         hook = AzureSynapseAsyncHook(
-            azure_synapse_conn_id=self.azure_synapse_conn_id)
+            azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint,
+            azure_synapse_conn_id=self.azure_synapse_conn_id
+        )
 
         try:
             if self.wait_for_termination:
-                self.log.info("End time: %s, Current time: %s", self.end_time, time.time())
+                self.log.info("End time: %s, Current time: %s",
+                              self.end_time, time.time())
 
                 while self.end_time > time.time():
                     try:

@@ -6,7 +6,7 @@ from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
 
 with DAG(
     dag_id="AzureSynapseRunPipelineDag",
-    schedule="0 0 * * *",
+    schedule=None,
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=datetime.timedelta(minutes=60),

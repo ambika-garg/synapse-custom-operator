@@ -6,7 +6,6 @@ from typing import Any, AsyncIterator, Dict, Tuple
 from hooks.azureSynapseHook import *
 # from hooks.azureSynapseHook import AzureSynapseAsyncHook, AzureSynapsePipelineRunStatus
 
-
 class AzureSynapseTrigger(BaseTrigger):
     # TODO: Add documentation.
 

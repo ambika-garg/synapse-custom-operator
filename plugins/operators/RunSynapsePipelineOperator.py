@@ -130,6 +130,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                         f"Pipeline run {self.run_id} has failed or has been cancelled."
                     )
             else:
+                self.log.info("Operator is in defferable mode")
                 end_time = time.time() + self.timeout
                 pipeline_run_status = self.hook.get_pipeline_run_status(
                     run_id=self.run_id

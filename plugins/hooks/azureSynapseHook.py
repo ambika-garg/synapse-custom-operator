@@ -273,7 +273,7 @@ class AzureSynapseAsyncHook(AzureSynapseHook):
         azure_synapse_conn_id: str = default_conn_name
     ):
         self.log.info("Enter Async hook")
-        super().__init__(azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id)
+        AzureSynapseHook.__init__(self, azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id)
         self.log.info("Initialization complete for hook")
         self._async_conn: AsyncArtifactsClient = None
         self.conn_id = azure_synapse_conn_id

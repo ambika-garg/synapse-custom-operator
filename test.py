@@ -4,7 +4,7 @@ class Old():
 	def hello():
 		print("hello")
 
-class Class(Old):
+class ParentClass(Old):
 	def __init__(self, azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id):
 		self._conn = None
 		self.conn_id = azure_synapse_conn_id
@@ -13,11 +13,11 @@ class Class(Old):
 
 
 # this is the subclass of class "Class"
-class SubClass(Class):
+class SubClass(ParentClass):
 	# this is how we call super
 	# class's constructor
 	def __init__(self, azure_synapse_workspace_dev_endpoint: str, azure_synapse_conn_id: str):
-		super().__init__(azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id)
+		ParentClass.__init__(self, azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id)
 		self._async_conn = None
 		self.conn_id = azure_synapse_conn_id
 		print(self.conn_id)

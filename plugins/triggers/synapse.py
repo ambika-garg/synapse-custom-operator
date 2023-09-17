@@ -50,74 +50,74 @@ class AzureSynapseTrigger(BaseTrigger):
             azure_synapse_conn_id=self.azure_synapse_conn_id
         )
 
-        try:
-            if self.wait_for_termination:
-                self.log.info("End time: %s, Current time: %s",
-                              self.end_time, time.time())
+        # try:
+        #     if self.wait_for_termination:
+        #         self.log.info("End time: %s, Current time: %s",
+        #                       self.end_time, time.time())
 
-                while self.end_time > time.time():
-                    try:
-                        pipeline_status = await hook.get_azure_pipeline_run_status(
-                            run_id=self.run_id
-                        )
+        #         while self.end_time > time.time():
+        #             try:
+        #                 pipeline_status = await hook.get_azure_pipeline_run_status(
+        #                     run_id=self.run_id
+        #                 )
 
-                        if pipeline_status in AzureSynapsePipelineRunStatus.FAILURE_STATES:
-                            yield TriggerEvent(
-                                {
-                                    "status": "error",
-                                    "message": f"The pipeline run {self.run_id} has {pipeline_status}.",
-                                    "run_id": self.run_id,
-                                }
-                            )
-                            return
+        #                 if pipeline_status in AzureSynapsePipelineRunStatus.FAILURE_STATES:
+        #                     yield TriggerEvent(
+        #                         {
+        #                             "status": "error",
+        #                             "message": f"The pipeline run {self.run_id} has {pipeline_status}.",
+        #                             "run_id": self.run_id,
+        #                         }
+        #                     )
+        #                     return
 
-                        elif pipeline_status == AzureSynapsePipelineRunStatus.SUCCEEDED:
-                            yield TriggerEvent(
-                                {
-                                    "status": "success",
-                                    "message": f"The pipeline run {self.run_id} has {pipeline_status}.",
-                                    "run_id": self.run_id,
-                                }
-                            )
-                            return
-                        self.log.info(
-                            "Sleeping for %s. The pipeline state is %s.", self.check_interval, pipeline_status
-                        )
-                        await asyncio.sleep(self.check_interval)
-                    except ServiceRequestError:
-                        # conn might expire during long running pipeline.
-                        # If expcetion is caught, it tries to refresh connection once.
-                        # If it still doesn't fix the issue,
-                        # than the execute_after_token_refresh would still be False
-                        # and an exception will be raised
-                        if executed_after_token_refresh:
-                            await hook.refresh_conn()
-                            executed_after_token_refresh = False
-                        else:
-                            raise
-                yield TriggerEvent(
-                    {
-                        "status": "error",
-                        "message": f"Timeout: The pipeline run {self.run_id} has {pipeline_status}.",
-                        "run_id": self.run_id,
-                    }
-                )
-            else:
-                yield TriggerEvent(
-                    {
-                        "status": "success",
-                        "message": f"The pipeline run {self.run_id} has {pipeline_status} status.",
-                        "run_id": self.run_id,
-                    }
-                )
-        except Exception as e:
-            if self.run_id:
-                try:
-                    await hook.cancel_pipeline_run(
-                        run_id=self.run_id
-                    )
-                    self.log.info(
-                        "Unexpected error %s caught. Cancel pipeline run %s", e, self.run_id)
-                except Exception as err:
-                    yield TriggerEvent({"status": "error", "message": str(err), "run_id": self.run_id})
-            yield TriggerEvent({"status": "error", "message": str(e), "run_id": self.run_id})
+        #                 elif pipeline_status == AzureSynapsePipelineRunStatus.SUCCEEDED:
+        #                     yield TriggerEvent(
+        #                         {
+        #                             "status": "success",
+        #                             "message": f"The pipeline run {self.run_id} has {pipeline_status}.",
+        #                             "run_id": self.run_id,
+        #                         }
+        #                     )
+        #                     return
+        #                 self.log.info(
+        #                     "Sleeping for %s. The pipeline state is %s.", self.check_interval, pipeline_status
+        #                 )
+        #                 await asyncio.sleep(self.check_interval)
+        #             except ServiceRequestError:
+        #                 # conn might expire during long running pipeline.
+        #                 # If expcetion is caught, it tries to refresh connection once.
+        #                 # If it still doesn't fix the issue,
+        #                 # than the execute_after_token_refresh would still be False
+        #                 # and an exception will be raised
+        #                 if executed_after_token_refresh:
+        #                     await hook.refresh_conn()
+        #                     executed_after_token_refresh = False
+        #                 else:
+        #                     raise
+        #         yield TriggerEvent(
+        #             {
+        #                 "status": "error",
+        #                 "message": f"Timeout: The pipeline run {self.run_id} has {pipeline_status}.",
+        #                 "run_id": self.run_id,
+        #             }
+        #         )
+        #     else:
+        #         yield TriggerEvent(
+        #             {
+        #                 "status": "success",
+        #                 "message": f"The pipeline run {self.run_id} has {pipeline_status} status.",
+        #                 "run_id": self.run_id,
+        #             }
+        #         )
+        # except Exception as e:
+        #     if self.run_id:
+        #         try:
+        #             await hook.cancel_pipeline_run(
+        #                 run_id=self.run_id
+        #             )
+        #             self.log.info(
+        #                 "Unexpected error %s caught. Cancel pipeline run %s", e, self.run_id)
+        #         except Exception as err:
+        #             yield TriggerEvent({"status": "error", "message": str(err), "run_id": self.run_id})
+        #     yield TriggerEvent({"status": "error", "message": str(e), "run_id": self.run_id})

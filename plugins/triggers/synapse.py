@@ -45,10 +45,10 @@ class AzureSynapseTrigger(BaseTrigger):
 
         self.log.info("In the trigger run")
 
-        hook = AzureSynapseAsyncHook(
-            azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint,
-            azure_synapse_conn_id=self.azure_synapse_conn_id
-        )
+        # hook = AzureSynapseAsyncHook(
+        #     azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint,
+        #     azure_synapse_conn_id=self.azure_synapse_conn_id
+        # )
 
         # try:
         #     if self.wait_for_termination:

@@ -272,7 +272,7 @@ class AzureSynapseAsyncHook(AzureSynapseHook):
         azure_synapse_workspace_dev_endpoint: str,
         azure_synapse_conn_id: str = default_conn_name
     ):
-        super(AzureSynapseHook, self).__init__(azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id)
+        super().__init__(azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id)
         self._async_conn: AsyncArtifactsClient = None
         self.conn_id = azure_synapse_conn_id
 

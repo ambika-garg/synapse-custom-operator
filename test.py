@@ -11,11 +11,7 @@ class ParentClass(Old):
 		self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
 		super().__init__()
 
-
-# this is the subclass of class "Class"
 class SubClass(ParentClass):
-	# this is how we call super
-	# class's constructor
 	def __init__(self, azure_synapse_workspace_dev_endpoint: str, azure_synapse_conn_id: str):
 		ParentClass.__init__(self, azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id)
 		self._async_conn = None

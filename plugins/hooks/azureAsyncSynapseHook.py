@@ -1,4 +1,4 @@
-from plugins.hooks.azureSynapseHook import AzureSynapseHook
+from hooks.azureSynapseHook import AzureSynapseHook
 from azure.synapse.artifacts.aio import ArtifactsClient as AsyncArtifactsClient
 from asgiref.sync import sync_to_async
 from typing import TYPE_CHECKING, Any, Union
@@ -7,7 +7,7 @@ from azure.identity.aio import (
     ClientSecretCredential as AsyncClientSecretCredential,
     DefaultAzureCredential as AsyncDefaultAzureCredential,
 )
-from azure.synapse.artifacts.models import CreateRunResponse, PipelineRun
+from azure.synapse.artifacts.models import  PipelineRun
 
 
 AsyncCredentials = Union[AsyncClientSecretCredential, AsyncDefaultAzureCredential]

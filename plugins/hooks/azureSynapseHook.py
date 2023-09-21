@@ -194,6 +194,7 @@ class AzureSynapseHook(BaseHook):
         return pipeline_run_status
 
     def refresh_conn(self) -> ArtifactsClient:
+        self.log.info("connection refreshed!")
         self._conn = None
         return self.get_conn()
 
@@ -233,8 +234,7 @@ class AzureSynapseHook(BaseHook):
             time.sleep(check_interval)
 
             try:
-                pipeline_run_status = self.get_pipeline_run_status(
-                    run_id=run_id)
+                pipeline_run_status = self.get_pipeline_run_status(run_id=run_id)
                 executed_after_token_refresh = True
             except ServiceRequestError:
                 if executed_after_token_refresh:

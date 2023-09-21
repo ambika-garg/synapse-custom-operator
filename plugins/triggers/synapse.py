@@ -3,8 +3,8 @@ import asyncio
 from azure.core.exceptions import ServiceRequestError
 from airflow.triggers.base import BaseTrigger, TriggerEvent
 from typing import Any, AsyncIterator, Dict, Tuple
-from hooks.azureSynapseHook import *
-# from hooks.azureSynapseHook import AzureSynapseAsyncHook, AzureSynapsePipelineRunStatus
+from hooks.azureSynapseHook import AzureSynapseHook
+from hooks.azureAsyncSynapseHook import AzureSynapseAsyncHook
 
 class AzureSynapseTrigger(BaseTrigger):
     # TODO: Add documentation.

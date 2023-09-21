@@ -6,10 +6,11 @@ class Old():
 
 class ParentClass(Old):
 	def __init__(self, azure_synapse_workspace_dev_endpoint, azure_synapse_conn_id):
+		super().__init__()
 		self._conn = None
 		self.conn_id = azure_synapse_conn_id
 		self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
-		super().__init__()
+		
 
 class SubClass(ParentClass):
 	def __init__(self, azure_synapse_workspace_dev_endpoint: str, azure_synapse_conn_id: str):

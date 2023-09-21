@@ -5,37 +5,16 @@ from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
     AzureSynapseHook,
-    # AzureSynapsePipelineRunException,
+    AzureSynapsePipelineRunException,
+    AzureSynapsePipelineRunStatus
 )
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict, TYPE_CHECKING
 
-from triggers.synapse import AzureSynapseTrigger
 if TYPE_CHECKING:
     from airflow.models.taskinstancekey import TaskInstanceKey
     from airflow.utils.context import Context
-# TODO: Move this to hook.py only and import it here.
-
-
-class AzureSynapsePipelineRunStatus:
-    """Azure Synapse pipeline operation statuses."""
-
-    QUEUED = "Queued"
-    IN_PROGRESS = "InProgress"
-    SUCCEEDED = "Succeeded"
-    FAILED = "Failed"
-    CANCELING = "Canceling"
-    CANCELLED = "Cancelled"
-    TERMINAL_STATUSES = {CANCELLED, FAILED, SUCCEEDED}
-    INTERMEDIATE_STATES = {QUEUED, IN_PROGRESS, CANCELING}
-    FAILURE_STATES = {FAILED, CANCELLED}
-
-# TODO: Move this to hook.py only and import it here.
-
-
-class AzureSynapsePipelineRunException(AirflowException):
-    """An exception that indicates a pipeline run failed to complete."""
-
+    
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
     """
@@ -116,7 +95,6 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
         context["ti"].xcom_push(key="run_id", value=self.run_id)
 
         if self.wait_for_termination:
-            # if self.deferrable is False:
             self.log.info(
                 "Waiting for pipeline run %s to terminate.", self.run_id)
 
@@ -131,38 +109,6 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
             else:
                 raise AzureSynapsePipelineRunException(
                     f"Pipeline run {self.run_id} has failed or has been cancelled."
-                )
-            # else:
-            #     self.log.info("Operator is in defferable mode")
-            # end_time = time.time() + self.timeout
-            # pipeline_run_status = self.hook.get_pipeline_run_status(
-            #     run_id=self.run_id
-            # )
-            # if pipeline_run_status not in AzureSynapsePipelineRunStatus.TERMINAL_STATUSES:
-            #     self.defer(
-            #         timeout=self.execution_timeout,
-            #         trigger=AzureSynapseTrigger(
-            #             azure_synapse_conn_id=self.azure_synapse_conn_id,
-            #             azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint,
-            #             run_id=self.run_id,
-            #             wait_for_termination=self.wait_for_termination,
-            #             check_interval=self.check_interval,
-            #             end_time=end_time,
-            #         ),
-            #         method_name="execute_complete",
-            #     )
-            # elif pipeline_run_status == AzureSynapsePipelineRunStatus.SUCCEEDED:
-            #     self.log.info(
-            #         "Pipeline run %s has completed successfully.", self.run_id)
-            # elif pipeline_run_status in AzureSynapsePipelineRunStatus.FAILURE_STATES:
-                raise AzureSynapsePipelineRunException(
-                    f"Pipeline run {self.run_id} has failed or has been cancelled."
-                )
-        else:
-            if self.deferrable is True:
-                warnings.warn(
-                    "Argument `wait_for_termination` is False and `deferrable` is True , hence "
-                    "`deferrable` parameter doesn't have any effect",
                 )
 
     def execute_complete(self, event: Dict[str, str]) -> None:

@@ -1,6 +1,6 @@
 import time
 import warnings
-from airflow.models.baseoperator import BaseOperator, BaseOperatorLink, XCom
+from airflow.models import BaseOperator, BaseOperatorLink, XCom,TaskInstanceKey
 from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
@@ -11,7 +11,7 @@ from hooks.azureSynapseHook import (
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict, TYPE_CHECKING
 from airflow.utils.context import Context
-from airflow.models import taskinstancekey
+# from airflow.models import taskinstancekey
 # from airflow.models.taskinstancekey import TaskInstanceKey
 
 class AzureSynapsePipelineRunLink(BaseOperatorLink):
@@ -25,7 +25,7 @@ class AzureSynapsePipelineRunLink(BaseOperatorLink):
         self,
         operator: BaseOperator,
         *,
-        ti_key: taskinstancekey
+        ti_key: TaskInstanceKey
     ) -> str:
         run_id = XCom.get_value(key="run_id", ti_key=ti_key)
         conn_id = operator.azure_synapse_conn_id

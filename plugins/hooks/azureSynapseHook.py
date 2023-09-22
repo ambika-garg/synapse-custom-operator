@@ -8,18 +8,13 @@ from azure.core.exceptions import ServiceRequestError
 from airflow.hooks.base import BaseHook
 from airflow.providers.microsoft.azure.utils import get_field
 from azure.synapse.artifacts import ArtifactsClient
-from azure.identity.aio import (
-    ClientSecretCredential as AsyncClientSecretCredential,
-    DefaultAzureCredential as AsyncDefaultAzureCredential,
-)
-from airflow.exceptions import AirflowException, AirflowProviderDeprecationWarning
+from airflow.exceptions import AirflowException
 
 Credentials = Union[ClientSecretCredential, DefaultAzureCredential]
-AsyncCredentials = Union[AsyncClientSecretCredential, AsyncDefaultAzureCredential]
+
 
 class AzureSynapsePipelineRunStatus:
     """Azure Synapse pipeline operation statuses."""
-
     QUEUED = "Queued"
     IN_PROGRESS = "InProgress"
     SUCCEEDED = "Succeeded"
@@ -30,8 +25,10 @@ class AzureSynapsePipelineRunStatus:
     INTERMEDIATE_STATES = {QUEUED, IN_PROGRESS, CANCELING}
     FAILURE_STATES = {FAILED, CANCELLED}
 
+
 class AzureSynapsePipelineRunException(AirflowException):
     """An exception that indicates a pipeline run failed to complete."""
+
 
 class AzureSynapseHook(BaseHook):
     """
@@ -72,7 +69,7 @@ class AzureSynapseHook(BaseHook):
         self._conn: ArtifactsClient = None
         self.conn_id = azure_synapse_conn_id
         self.azure_synapse_workspace_dev_endpoint = azure_synapse_workspace_dev_endpoint
-        
+
     def _get_field(self, extras, name):
         return get_field(
             conn_id=self.conn_id,
@@ -113,7 +110,7 @@ class AzureSynapseHook(BaseHook):
     def run_pipeline(
         self,
         pipeline_name: str,
-        **config: Any,
+        **config: Any
     ) -> CreateRunResponse:
         """
         Run a Synapse pipeline.
@@ -122,6 +119,7 @@ class AzureSynapseHook(BaseHook):
         :param config: Extra parameters for the Synapse Artifact Client.
         :return: The pipeline run Id.
         """
+        # TODO: Test the config arguement
 
         return self.get_conn().pipeline.create_pipeline_run(pipeline_name, **config)
 
@@ -159,7 +157,7 @@ class AzureSynapseHook(BaseHook):
     def get_pipeline_run(
         self,
         run_id: str,
-        **config: Any,
+        **config: Any, 
     ) -> PipelineRun:
         """
         Get the pipeline run.
@@ -170,12 +168,12 @@ class AzureSynapseHook(BaseHook):
         :param config: Extra parameters for the ADF client.
         :return: The pipeline run.
         """
-
+        # TODO: Check config parameter.
         return self.get_conn().pipeline_run.get_pipeline_run(run_id=run_id)
 
     def get_pipeline_run_status(
         self,
-        run_id: str,
+        run_id: str
     ) -> str:
         """
         Get a pipeline run's current status.
@@ -194,7 +192,6 @@ class AzureSynapseHook(BaseHook):
         return pipeline_run_status
 
     def refresh_conn(self) -> ArtifactsClient:
-        self.log.info("connection refreshed!")
         self._conn = None
         return self.get_conn()
 
@@ -234,7 +231,8 @@ class AzureSynapseHook(BaseHook):
             time.sleep(check_interval)
 
             try:
-                pipeline_run_status = self.get_pipeline_run_status(run_id=run_id)
+                pipeline_run_status = self.get_pipeline_run_status(
+                    run_id=run_id)
                 executed_after_token_refresh = True
             except ServiceRequestError:
                 if executed_after_token_refresh:
@@ -253,5 +251,5 @@ class AzureSynapseHook(BaseHook):
 
         :param run_id: The pipeline run identifier.
         """
-         
+
         self.get_conn().pipeline_run.cancel_pipeline_run(run_id)

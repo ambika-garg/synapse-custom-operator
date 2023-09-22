@@ -1,6 +1,6 @@
 import time
 import warnings
-from airflow.models import BaseOperator
+from airflow.models import BaseOperator, BaseOperatorLink, XCom
 from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
@@ -14,7 +14,26 @@ from typing import Any, Optional, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from airflow.models.taskinstancekey import TaskInstanceKey
     from airflow.utils.context import Context
-    
+
+
+class AzureSynapsePipelineRunLink(BaseOperatorLink):
+    """
+    Constructs a link to monitor a pipeline run in Azure Synapse.
+    """
+
+    name = "Monitor Pipeline Run"
+
+    def get_link(
+        self,
+        operator: BaseOperator,
+        ti_key: TaskInstanceKey
+    ) -> str:
+        run_id = XCom.get_value(key="run_id", ti_key=ti_key)
+        conn_id = operator.azure_synapse_conn_id
+        self.log.info("Run ID: %s", run_id)
+        self.log.info("Conn Id: %s", conn_id)
+        return run_id
+
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
     """
@@ -23,7 +42,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
     :param pipeline_name: The name of the pipeline to execute.
     :param azure_synapse_conn_id: The Airflow connection ID for Azure Synapse.
     :param azure_synapse_workspace_dev_endpoint: The Azure Synapse workspace development endpoint.
-    :param wait_for_termination: Flag to wait on a pipeline run's termination. // TODO: Complete it. 
+    :param wait_for_termination: Flag to wait on a pipeline run's termination.
     :param reference_pipeline_run_id: The pipeline run identifier. If this run ID is specified the parameters
         of the specified run will be used to create a new run.
     :param is_recovery: Recovery mode flag. If recovery mode is set to `True`, the specified referenced
@@ -40,6 +59,8 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
     :param deferrable: Run operator in deferrable mode.
 
     """
+
+    operator_extra_links = (AzureSynapsePipelineRunLink(),)
 
     def __init__(
         self,
@@ -73,7 +94,6 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
     @cached_property
     def hook(self):
         """Create and return an AzureSynapseHook (cached)."""
-
         return AzureSynapseHook(
             azure_synapse_conn_id=self.azure_synapse_conn_id,
             azure_synapse_workspace_dev_endpoint=self.azure_synapse_workspace_dev_endpoint
@@ -93,6 +113,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
         # retrieval the executed pipeline's ``run_id`` for downstream tasks especially if performing an
         # asynchronous wait.
         context["ti"].xcom_push(key="run_id", value=self.run_id)
+        self.log.info("Operator Extra link: %s", self.operator_extra_links)
 
         if self.wait_for_termination:
             self.log.info(

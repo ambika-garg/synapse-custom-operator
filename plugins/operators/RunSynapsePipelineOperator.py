@@ -23,6 +23,7 @@ class AzureSynapsePipelineRunLink(BaseOperatorLink):
     def get_link(
         self,
         operator: BaseOperator,
+        *,
         ti_key: TaskInstanceKey
     ) -> str:
         run_id = XCom.get_value(key="run_id", ti_key=ti_key)

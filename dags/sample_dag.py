@@ -16,7 +16,7 @@ with DAG(
     
     show_apache_airflow = BashOperator(
         task_id="Show_apache_airflow_install",
-        bash_command="echo pip show apache-airflow"
+        bash_command="pip show apache-airflow"
     )
 
     trigger_synapse_pipeline = AzureSynapseRunPipelineOperator(

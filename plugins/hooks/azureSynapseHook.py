@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Union
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.synapse.artifacts.models import CreateRunResponse, PipelineRun
 # from airflow.exceptions import AirflowTaskTimeout
+from urllib.parse import urlencode
 from azure.core.exceptions import ServiceRequestError
 from airflow.hooks.base import BaseHook
 from airflow.providers.microsoft.azure.utils import get_field
@@ -157,7 +158,7 @@ class AzureSynapseHook(BaseHook):
     def get_pipeline_run(
         self,
         run_id: str,
-        **config: Any, 
+        **config: Any,
     ) -> PipelineRun:
         """
         Get the pipeline run.
@@ -253,3 +254,17 @@ class AzureSynapseHook(BaseHook):
         """
 
         self.get_conn().pipeline_run.cancel_pipeline_run(run_id)
+
+    def get_pipeline_run_link(
+        self,
+        run_id: str
+    ) -> str:
+        workspace_name, subscription_id, resource_group = self.__get_fields_from_url(
+            self.azure_synapse_workspace_dev_endpoint)
+
+        params = {
+            "workspace": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Synapse/workspaces/{workspace_name}",
+        }
+        encoded_params = urlencode(params)
+        base_url = f"https://ms.web.azuresynapse.net/en/monitoring/pipelineruns/{run_id}?"
+        return base_url + encoded_params

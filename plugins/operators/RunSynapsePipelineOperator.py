@@ -11,26 +11,26 @@ from hooks.azureSynapseHook import (
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict, TYPE_CHECKING
 from airflow.utils.context import Context
-from airflow.models.taskinstancekey import TaskInstanceKey
+# from airflow.models.taskinstancekey import TaskInstanceKey
 
-class AzureSynapsePipelineRunLink(BaseOperatorLink):
-    """
-    Constructs a link to monitor a pipeline run in Azure Synapse.
-    """
+# class AzureSynapsePipelineRunLink(BaseOperatorLink):
+#     """
+#     Constructs a link to monitor a pipeline run in Azure Synapse.
+#     """
 
-    name = "Monitor Pipeline Run"
+#     name = "Monitor Pipeline Run"
 
-    def get_link(
-        self,
-        operator: BaseOperator,
-        *,
-        ti_key: TaskInstanceKey
-    ) -> str:
-        run_id = XCom.get_value(key="run_id", ti_key=ti_key)
-        conn_id = operator.azure_synapse_conn_id
-        self.log.info("Run ID: %s", run_id)
-        self.log.info("Conn Id: %s", conn_id)
-        return run_id
+#     def get_link(
+#         self,
+#         operator: BaseOperator,
+#         *,
+#         ti_key: TaskInstanceKey
+#     ) -> str:
+#         run_id = XCom.get_value(key="run_id", ti_key=ti_key)
+#         conn_id = operator.azure_synapse_conn_id
+#         self.log.info("Run ID: %s", run_id)
+#         self.log.info("Conn Id: %s", conn_id)
+#         return run_id
 
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
@@ -112,6 +112,9 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
         # asynchronous wait.
         context["ti"].xcom_push(key="run_id", value=self.run_id)
         # self.log.info("Operator Extra link: %s", self.operator_extra_links)
+
+        self.pipeline_run_link = self.hook.get_pipeline_run_link(self.run_id)
+        context["ti"].xcom_push(key="pipeline_run_link", value=self.pipeline_run_link)
 
         if self.wait_for_termination:
             self.log.info(

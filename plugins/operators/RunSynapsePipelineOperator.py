@@ -1,6 +1,6 @@
 import time
 import warnings
-from airflow.models import BaseOperator, BaseOperatorLink, XCom
+from airflow.models.baseoperator import BaseOperator, BaseOperatorLink, XCom
 from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
@@ -11,26 +11,27 @@ from hooks.azureSynapseHook import (
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict, TYPE_CHECKING
 from airflow.utils.context import Context
+from airflow.models import taskinstancekey
 # from airflow.models.taskinstancekey import TaskInstanceKey
 
-# class AzureSynapsePipelineRunLink(BaseOperatorLink):
-#     """
-#     Constructs a link to monitor a pipeline run in Azure Synapse.
-#     """
+class AzureSynapsePipelineRunLink(BaseOperatorLink):
+    """
+    Constructs a link to monitor a pipeline run in Azure Synapse.
+    """
 
-#     name = "Monitor Pipeline Run"
+    name = "Monitor Pipeline Run"
 
-#     def get_link(
-#         self,
-#         operator: BaseOperator,
-#         *,
-#         ti_key: TaskInstanceKey
-#     ) -> str:
-#         run_id = XCom.get_value(key="run_id", ti_key=ti_key)
-#         conn_id = operator.azure_synapse_conn_id
-#         self.log.info("Run ID: %s", run_id)
-#         self.log.info("Conn Id: %s", conn_id)
-#         return run_id
+    def get_link(
+        self,
+        operator: BaseOperator,
+        *,
+        ti_key: taskinstancekey
+    ) -> str:
+        run_id = XCom.get_value(key="run_id", ti_key=ti_key)
+        conn_id = operator.azure_synapse_conn_id
+        self.log.info("Run ID: %s", run_id)
+        self.log.info("Conn Id: %s", conn_id)
+        return run_id
 
 
 class AzureSynapseRunPipelineOperator(BaseOperator):

@@ -2,7 +2,6 @@ from __future__ import annotations
 import datetime
 import pendulum
 from airflow import DAG
-from airflow.operators.bash import BashOperator
 from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
 
 with DAG(
@@ -13,12 +12,6 @@ with DAG(
     dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["pipeline"],
 ) as dag:
-    
-    show_apache_airflow = BashOperator(
-        task_id="Show_apache_airflow_install",
-        bash_command="pip show apache-airflow"
-    )
-
     trigger_synapse_pipeline = AzureSynapseRunPipelineOperator(
         azure_synapse_conn_id="azure_synapse_connection",
         task_id="trigger_synapse_pipeline",
@@ -26,5 +19,3 @@ with DAG(
         azure_synapse_workspace_dev_endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net",
         deferrable=True 
     )
-
-    show_apache_airflow >> trigger_synapse_pipeline

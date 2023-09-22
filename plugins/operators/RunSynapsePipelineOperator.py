@@ -10,9 +10,8 @@ from hooks.azureSynapseHook import (
 )
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict, TYPE_CHECKING
-from airflow.models.taskinstancekey import TaskInstanceKey
 from airflow.utils.context import Context
-
+from airflow.models.taskinstancekey import TaskInstanceKey
 
 class AzureSynapsePipelineRunLink(BaseOperatorLink):
     """

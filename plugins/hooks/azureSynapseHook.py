@@ -100,6 +100,10 @@ class AzureSynapseHook(BaseHook):
                 if len(path_segments) == 0:
                     raise
 
+                print(path_segments[-1])
+                print(path_segments[2])
+                print(path_segments[4])
+                
                 return {
                     "workspace_name": path_segments[-1],
                     "subscription_id": path_segments[2],

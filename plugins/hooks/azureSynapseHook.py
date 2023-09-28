@@ -93,6 +93,8 @@ class AzureSynapseHook(BaseHook):
             match = re.search(pattern, workspace_url)
 
             self.log.info("match %s", match)
+            self.log.info("pattern %s", pattern)
+            self.log.info("workspace_url %s", workspace_url)
 
             if not match:
                 raise ValueError("Invalid workspace URL format")

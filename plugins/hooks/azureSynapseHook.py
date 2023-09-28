@@ -278,7 +278,7 @@ class AzureSynapseHook(BaseHook):
             self.synapse_workspace_url)
 
         params = {
-            "workspace": f"/subscriptions/{fields.subscription_id}/resourceGroups/{fields.resource_group}/providers/Microsoft.Synapse/workspaces/{fields.workspace_name}",
+            "workspace": f"/subscriptions/{fields['subscription_id']}/resourceGroups/{fields['resource_group']}/providers/Microsoft.Synapse/workspaces/{fields['workspace_name']}",
         }
         encoded_params = urlencode(params)
         base_url = f"https://ms.web.azuresynapse.net/en/monitoring/pipelineruns/{run_id}?"

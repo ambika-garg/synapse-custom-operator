@@ -17,5 +17,5 @@ with DAG(
         task_id="trigger_synapse_pipeline",
         pipeline_name="Pipeline 1",
         azure_synapse_workspace_dev_endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net",
-        deferrable=True 
+        deferrable=False 
     )

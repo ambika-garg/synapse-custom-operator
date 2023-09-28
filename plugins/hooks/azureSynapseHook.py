@@ -259,11 +259,11 @@ class AzureSynapseHook(BaseHook):
         self,
         run_id: str
     ) -> str:
-        workspace_name, subscription_id, resource_group = self.__get_fields_from_url(
+        fields = self.__get_fields_from_url(
             self.azure_synapse_workspace_dev_endpoint)
 
         params = {
-            "workspace": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Synapse/workspaces/{workspace_name}",
+            "workspace": f"/subscriptions/{fields.subscription_id}/resourceGroups/{fields.resource_group}/providers/Microsoft.Synapse/workspaces/{fields.workspace_name}",
         }
         encoded_params = urlencode(params)
         base_url = f"https://ms.web.azuresynapse.net/en/monitoring/pipelineruns/{run_id}?"

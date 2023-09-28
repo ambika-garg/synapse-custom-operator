@@ -98,7 +98,7 @@ class AzureSynapseHook(BaseHook):
 
             if not match:
                 raise ValueError("Invalid workspace URL format")
-        
+
             extracted_text = match.group(1)
             parsed_url = urlparse(extracted_text)
             path = unquote(parsed_url.path)
@@ -106,10 +106,11 @@ class AzureSynapseHook(BaseHook):
             if len(path_segments) == 0:
                 raise
 
+            # TODO: Remove
             self.log.info(path_segments[-1])
             self.log.info(path_segments[2])
             self.log.info(path_segments[4])
-            
+
             return {
                 "workspace_name": path_segments[-1],
                 "subscription_id": path_segments[2],
@@ -269,10 +270,10 @@ class AzureSynapseHook(BaseHook):
         self,
         run_id: str
     ) -> str:
-        
+
         conn = self.get_connection(self.conn_id)
         self.synapse_workspace_url = conn.host
-        
+
         fields = self.__get_fields_from_url(
             self.synapse_workspace_url)
 

@@ -92,23 +92,25 @@ class AzureSynapseHook(BaseHook):
             pattern = r'https://web\.azuresynapse\.net\?workspace=(.*)'
             match = re.search(pattern, workspace_url)
 
-            if match:
-                extracted_text = match.group(1)
-                parsed_url = urlparse(extracted_text)
-                path = unquote(parsed_url.path)
-                path_segments = path.split('/')
-                if len(path_segments) == 0:
-                    raise
+            if not match:
+                raise ValueError("Invalid workspace URL format")
+        
+            extracted_text = match.group(1)
+            parsed_url = urlparse(extracted_text)
+            path = unquote(parsed_url.path)
+            path_segments = path.split('/')
+            if len(path_segments) == 0:
+                raise
 
-                print(path_segments[-1])
-                print(path_segments[2])
-                print(path_segments[4])
-                
-                return {
-                    "workspace_name": path_segments[-1],
-                    "subscription_id": path_segments[2],
-                    "resource_group": path_segments[4]
-                }
+            self.log.info(path_segments[-1])
+            self.log.info(path_segments[2])
+            self.log.info(path_segments[4])
+            
+            return {
+                "workspace_name": path_segments[-1],
+                "subscription_id": path_segments[2],
+                "resource_group": path_segments[4]
+            }
         except:
             self.log.error("No segment found in the workspace URL.")
 

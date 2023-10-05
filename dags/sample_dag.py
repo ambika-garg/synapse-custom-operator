@@ -21,6 +21,8 @@ with DAG(
         deferrable=False 
     )
 
-    trigger_google_operator = MyFirstOperator()
+    trigger_google_operator = MyFirstOperator(
+        task_id="Google_operator"
+    )
 
     trigger_synapse_pipeline >> trigger_google_operator 

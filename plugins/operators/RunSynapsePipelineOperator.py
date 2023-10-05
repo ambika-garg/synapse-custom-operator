@@ -72,7 +72,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
         pipeline_name: str,
         azure_synapse_conn_id: str,
         azure_synapse_workspace_dev_endpoint: str,
-        wait_for_termination: bool = True,
+        wait_for_termination: bool = False,
         reference_pipeline_run_id: Optional[str] = None,
         is_recovery: Optional[bool] = None,
         start_activity_name: Optional[str] = None,

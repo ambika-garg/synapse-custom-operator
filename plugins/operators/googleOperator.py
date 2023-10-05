@@ -1,5 +1,6 @@
 from airflow.models.baseoperator import BaseOperator, BaseOperatorLink
 from airflow.plugins_manager import AirflowPlugin
+from airflow.models.taskinstancekey import TaskInstanceKey
 
 
 class GoogleLink(BaseOperatorLink):

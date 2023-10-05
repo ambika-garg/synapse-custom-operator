@@ -12,6 +12,7 @@ from hooks.azureSynapseHook import (
 from airflow.exceptions import AirflowException
 from typing import Any, Optional, Dict, TYPE_CHECKING
 from airflow.utils.context import Context
+from airflow.models.taskinstancekey import TaskInstanceKey
 
 # class AzureSynapsePipelineRunLink(BaseOperatorLink):
 #     """
@@ -35,7 +36,7 @@ from airflow.utils.context import Context
 class GoogleLink(BaseOperatorLink):
     name = "Google"
 
-    def get_link(self, operator: BaseOperator):
+    def get_link(self, operator: BaseOperator, *, ti_key: TaskInstanceKey):
         return "https://www.google.com"
     
 

@@ -3,6 +3,7 @@ import datetime
 import pendulum
 from airflow import DAG
 from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
+from plugins.operators.googleOperator import MyFirstOperator
 
 with DAG(
     dag_id="AzureSynapseRunPipelineDag",
@@ -19,3 +20,7 @@ with DAG(
         azure_synapse_workspace_dev_endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net",
         deferrable=False 
     )
+
+    trigger_google_operator = MyFirstOperator()
+
+    trigger_synapse_pipeline >> trigger_google_operator 

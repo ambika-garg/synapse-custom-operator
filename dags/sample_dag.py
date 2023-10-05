@@ -3,7 +3,7 @@ import datetime
 import pendulum
 from airflow import DAG
 from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
-from plugins.operators.googleOperator import MyFirstOperator
+from operators.googleOperator import MyFirstOperator
 
 with DAG(
     dag_id="AzureSynapseRunPipelineDag",

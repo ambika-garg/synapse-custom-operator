@@ -3,7 +3,6 @@ import time
 from typing import TYPE_CHECKING, Any, Union
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.synapse.artifacts.models import CreateRunResponse, PipelineRun
-# from airflow.exceptions import AirflowTaskTimeout
 from urllib.parse import urlencode
 from azure.core.exceptions import ServiceRequestError
 from airflow.hooks.base import BaseHook
@@ -33,10 +32,11 @@ class AzureSynapsePipelineRunException(AirflowException):
 
 class AzureSynapseHook(BaseHook):
     """
-    A hook to interact with Azure Synapse.
+    A hook to interact with Azure Synapse Pipeline.
 
     :param conn_id: The :ref:`Azure Synapse connection id<howto/connection:synapse>`.
-    :param spark_pool: The Apache Spark pool used to submit the job
+    :param azure_synapse_workspace_dev_endpoint: The Azure Synapse Workspace development endpoint.
+
     """
 
     conn_type: str = "azure_synapse"
@@ -92,10 +92,6 @@ class AzureSynapseHook(BaseHook):
             pattern = r'https://web\.azuresynapse\.net\?workspace=(.*)'
             match = re.search(pattern, workspace_url)
 
-            self.log.info("match %s", match)
-            self.log.info("pattern %s", pattern)
-            self.log.info("workspace_url %s", workspace_url)
-
             if not match:
                 raise ValueError("Invalid workspace URL format")
 
@@ -105,11 +101,6 @@ class AzureSynapseHook(BaseHook):
             path_segments = path.split('/')
             if len(path_segments) == 0:
                 raise
-
-            # TODO: Remove
-            self.log.info(path_segments[-1])
-            self.log.info(path_segments[2])
-            self.log.info(path_segments[4])
 
             return {
                 "workspace_name": path_segments[-1],
@@ -131,7 +122,6 @@ class AzureSynapseHook(BaseHook):
         :param config: Extra parameters for the Synapse Artifact Client.
         :return: The pipeline run Id.
         """
-        # TODO: Test the config arguement
 
         return self.get_conn().pipeline.create_pipeline_run(pipeline_name, **config)
 
@@ -168,19 +158,14 @@ class AzureSynapseHook(BaseHook):
 
     def get_pipeline_run(
         self,
-        run_id: str,
-        **config: Any,
+        run_id: str
     ) -> PipelineRun:
         """
         Get the pipeline run.
 
         :param run_id: The pipeline run identifier.
-        :param resource_group_name: The resource group name.
-        :param factory_name: The factory name.
-        :param config: Extra parameters for the ADF client.
         :return: The pipeline run.
         """
-        # TODO: Check config parameter.
         return self.get_conn().pipeline_run.get_pipeline_run(run_id=run_id)
 
     def get_pipeline_run_status(
@@ -270,7 +255,9 @@ class AzureSynapseHook(BaseHook):
         self,
         run_id: str
     ) -> str:
-
+        """
+        Returns the Pipeline run link.
+        """
         conn = self.get_connection(self.conn_id)
         self.synapse_workspace_url = conn.host
 

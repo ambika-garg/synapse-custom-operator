@@ -1,6 +1,7 @@
 import time
 import warnings
-from airflow.models import BaseOperator, BaseOperatorLink, XCom
+from airflow.models import BaseOperator, BaseOperatorLink
+from airflow.plugins_manager import AirflowPlugin
 from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
@@ -31,6 +32,12 @@ from airflow.utils.context import Context
 #         self.log.info("Conn Id: %s", conn_id)
 #         return run_id
 
+class GoogleLink(BaseOperatorLink):
+    name = "Google"
+
+    def get_link(self, operator: BaseOperator):
+        return "https://www.google.com"
+    
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
     """
@@ -57,7 +64,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
 
     """
 
-    # operator_extra_links = (AzureSynapsePipelineRunLink(),)
+    operator_extra_links = (GoogleLink(),)
 
     def __init__(
         self,
@@ -113,7 +120,8 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
         # self.log.info("Operator Extra link: %s", self.operator_extra_links)
 
         self.pipeline_run_link = self.hook.get_pipeline_run_link(self.run_id)
-        context["ti"].xcom_push(key="pipeline_run_link", value=self.pipeline_run_link)
+        context["ti"].xcom_push(key="pipeline_run_link",
+                                value=self.pipeline_run_link)
 
         if self.wait_for_termination:
             self.log.info(
@@ -146,9 +154,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
     def on_kill(self) -> None:
         if self.run_id:
             self.hook.cancel_pipeline_run(
-                run_id=self.run_id,
-                resource_group_name=self.resource_group_name,
-                factory_name=self.factory_name,
+                run_id=self.run_id
             )
 
             # Check to ensure the pipeline run was cancelled as expected.
@@ -163,3 +169,10 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
             else:
                 raise AzureSynapsePipelineRunException(
                     f"Pipeline run {self.run_id} was not cancelled.")
+
+# Defining the plugin class
+class AirflowExtraLinkPlugin(AirflowPlugin):
+    name = "extra_link_plugin"
+    operator_extra_links = [
+        GoogleLink(),
+    ]

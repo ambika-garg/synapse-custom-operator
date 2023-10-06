@@ -25,5 +25,5 @@ class MyFirstOperator(BaseOperator):
 class AirflowExtraLinkPlugin(AirflowPlugin):
     name = "extra_link_plugin"
     operator_extra_links = [
-        GoogleLink(),
+        "https://www.google.com"
     ]

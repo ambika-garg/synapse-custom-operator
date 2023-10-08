@@ -26,7 +26,7 @@ with DAG(
         task_id="Google_operator"
     )
 
-    python_version = BashOperator(task_id="Python version", bash_command="python --version")
+    python_version = BashOperator(task_id="pythonversion", bash_command="python --version")
 
     # trigger_synapse_pipeline >>  
     trigger_google_operator >> python_version

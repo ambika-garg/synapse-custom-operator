@@ -1,6 +1,5 @@
 from __future__ import annotations
 import datetime
-import pendulum
 from airflow import DAG
 # from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
 # from operators.googleOperator import MyFirstOperator
@@ -9,7 +8,7 @@ from airflow.operators.bash import BashOperator
 with DAG(
     dag_id="AzureSynapseRunPipelineDag",
     schedule=None,
-    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
+    start_date=datetime.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["pipeline"],

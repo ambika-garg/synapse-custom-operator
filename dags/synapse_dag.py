@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.bash import BashOperator
 
 with DAG(
-    dag_id="AzureSynapseRunPipelineDag",
+    dag_id="debug_pipeline",
     schedule=None,
     start_date=datetime(2021, 1, 1),
     catchup=False,

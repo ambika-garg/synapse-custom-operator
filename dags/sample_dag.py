@@ -9,7 +9,7 @@ with DAG(
     schedule=None,
     start_date=datetime.datetime(2021, 1, 1),
     catchup=False,
-    dagrun_timeout=datetime.timedelta(minutes=60),
+    # dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["pipeline"],
 ) as dag:
     # trigger_synapse_pipeline = AzureSynapseRunPipelineOperator(

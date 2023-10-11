@@ -7,7 +7,7 @@ with DAG(
     schedule=None,
     start_date=datetime(2021, 1, 1),
     catchup=False,
-    dagrun_timeout=datetime.timedelta(minutes=60),
+    # dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["pipeline"],
 ) as dag:
     python_version = BashOperator(task_id="pythonversion", bash_command="python --version")

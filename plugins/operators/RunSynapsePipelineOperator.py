@@ -171,9 +171,3 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                 raise AzureSynapsePipelineRunException(
                     f"Pipeline run {self.run_id} was not cancelled.")
 
-# Defining the plugin class
-class AirflowExtraLinkPlugin(AirflowPlugin):
-    name = "extra_link_plugin"
-    operator_extra_links = [
-        GoogleLink(),
-    ]

@@ -1,6 +1,6 @@
 import datetime
 from airflow import DAG
-# from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
+from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
 # from operators.googleOperator import MyFirstOperator
 from airflow.operators.bash import BashOperator
 
@@ -12,19 +12,16 @@ with DAG(
     # dagrun_timeout=datetime.timedelta(minutes=60),
     tags=["pipeline"],
 ) as dag:
-    # trigger_synapse_pipeline = AzureSynapseRunPipelineOperator(
-    #     azure_synapse_conn_id="azure_synapse_connection",
-    #     task_id="trigger_synapse_pipeline",
-    #     pipeline_name="Pipeline 1",
-    #     azure_synapse_workspace_dev_endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net",
-    #     deferrable=False 
-    # )
+    trigger_synapse_pipeline = AzureSynapseRunPipelineOperator(
+        azure_synapse_conn_id="azure_synapse_connection",
+        task_id="trigger_synapse_pipeline",
+        pipeline_name="Pipeline 1",
+        azure_synapse_workspace_dev_endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net",
+        deferrable=False 
+    )
 
     # trigger_google_operator = MyFirstOperator(
     #     task_id="Google_operator"
     # )
 
-    python_version = BashOperator(task_id="pythonversion", bash_command="python --version")
-
-    # trigger_synapse_pipeline >>  
-    python_version
+    trigger_synapse_pipeline

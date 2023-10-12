@@ -1,7 +1,4 @@
-import time
-import warnings
-from airflow.models import BaseOperator, BaseOperatorLink
-from airflow.plugins_manager import AirflowPlugin
+from airflow.models import BaseOperator
 from airflow.configuration import conf
 from functools import cached_property
 from hooks.azureSynapseHook import (
@@ -10,9 +7,7 @@ from hooks.azureSynapseHook import (
     AzureSynapsePipelineRunStatus
 )
 from airflow.exceptions import AirflowException
-from typing import Any, Optional, Dict, TYPE_CHECKING
-from airflow.utils.context import Context
-from airflow.models.taskinstancekey import TaskInstanceKey
+from typing import Any, Optional, Dict
 
 # class AzureSynapsePipelineRunLink(BaseOperatorLink):
 #     """
@@ -33,11 +28,11 @@ from airflow.models.taskinstancekey import TaskInstanceKey
 #         self.log.info("Conn Id: %s", conn_id)
 #         return run_id
 
-class GoogleLink(BaseOperatorLink):
-    name = "Google"
+# class GoogleLink(BaseOperatorLink):
+#     name = "Google"
 
-    def get_link(self, operator: BaseOperator, *, ti_key: TaskInstanceKey):
-        return "https://www.google.com"
+#     def get_link(self, operator: BaseOperator, *, ti_key: TaskInstanceKey):
+#         return "https://www.google.com"
     
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
@@ -65,7 +60,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
 
     """
 
-    operator_extra_links = (GoogleLink(),)
+    # operator_extra_links = (GoogleLink(),)
 
     def __init__(
         self,

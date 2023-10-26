@@ -22,8 +22,8 @@ class WaitOneHourSensor(BaseSensorOperator):
 
     def execute_complete(
         self,
-        context: Context,
-        event: Dict[str, Any] | None = None,
+        # context: Context,
+        # event: Dict[str, Any] | None = None,
     ) -> None:
         # We have no more work to do here. Mark as complete.
         return

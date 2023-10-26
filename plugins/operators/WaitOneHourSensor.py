@@ -1,6 +1,6 @@
 import time
 from datetime import timedelta
-from typing import Any
+from typing import Any, Dict
 
 from airflow.configuration import conf
 from airflow.sensors.base import BaseSensorOperator
@@ -23,7 +23,7 @@ class WaitOneHourSensor(BaseSensorOperator):
     def execute_complete(
         self,
         context: Context,
-        event: dict[str, Any] | None = None,
+        event: Dict[str, Any] | None = None,
     ) -> None:
         # We have no more work to do here. Mark as complete.
         return

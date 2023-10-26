@@ -13,6 +13,6 @@ with DAG(
     tags=["Triggers"],
 ) as dag:
 
-    WaitOneHourSensor = WaitOneHourSensor()
+    WaitOneHourSensor = WaitOneHourSensor(task_id = "TestTriggers")
 
     WaitOneHourSensor

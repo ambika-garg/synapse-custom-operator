@@ -11,7 +11,7 @@ with DAG(
     catchup=False,
     tags=["synapse", "example"],
 ) as dag:
-    
+
     run_pipeline1 = AzureSynapseRunPipelineOperator(
         task_id="run_pipeline1",
         azure_synapse_conn_id="azure_synapse_connection",

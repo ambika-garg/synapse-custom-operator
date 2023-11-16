@@ -7,14 +7,12 @@ from urllib.parse import urlencode
 from airflow.exceptions import AirflowException
 from airflow.hooks.base import BaseHook
 from airflow.models import BaseOperator, BaseOperatorLink, XCom
-from airflow.providers.microsoft.azure.hooks.synapse import (
-    AzureSynapsePipelineHook,
-    AzureSynapsePipelineRunException,
-    AzureSynapsePipelineRunStatus,
-)
+from hooks.azureSynapseHook import AzureSynapsePipelineHook, AzureSynapsePipelineRunException, AzureSynapsePipelineRunStatus
+
 
 if TYPE_CHECKING:
     from airflow.models.taskinstancekey import TaskInstanceKey
+
 
 class AzureSynapsePipelineRunLink(BaseOperatorLink):
     """Constructs a link to monitor a pipeline run in Azure Synapse."""
@@ -146,7 +144,8 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
         context["ti"].xcom_push(key="run_id", value=self.run_id)
 
         if self.wait_for_termination:
-            self.log.info("Waiting for pipeline run %s to terminate.", self.run_id)
+            self.log.info(
+                "Waiting for pipeline run %s to terminate.", self.run_id)
 
             if self.hook.wait_for_pipeline_run_status(
                 run_id=self.run_id,
@@ -154,7 +153,8 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                 check_interval=self.check_interval,
                 timeout=self.timeout,
             ):
-                self.log.info("Pipeline run %s has completed successfully.", self.run_id)
+                self.log.info(
+                    "Pipeline run %s has completed successfully.", self.run_id)
             else:
                 raise AzureSynapsePipelineRunException(
                     f"Pipeline run {self.run_id} has failed or has been cancelled."
@@ -182,6 +182,8 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
                 check_interval=self.check_interval,
                 timeout=self.timeout,
             ):
-                self.log.info("Pipeline run %s has been cancelled successfully.", self.run_id)
+                self.log.info(
+                    "Pipeline run %s has been cancelled successfully.", self.run_id)
             else:
-                raise AzureSynapsePipelineRunException(f"Pipeline run {self.run_id} was not cancelled.")
+                raise AzureSynapsePipelineRunException(
+                    f"Pipeline run {self.run_id} was not cancelled.")

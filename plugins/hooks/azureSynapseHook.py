@@ -111,14 +111,16 @@ class AzureSynapsePipelineHook(BaseHook):
         credential: Credentials
         if conn.login is not None and conn.password is not None:
             if not tenant:
-                raise ValueError("A Tenant ID is required when authenticating with Client ID and Secret.")
+                raise ValueError(
+                    "A Tenant ID is required when authenticating with Client ID and Secret.")
 
             credential = ClientSecretCredential(
                 client_id=conn.login, client_secret=conn.password, tenant_id=tenant
             )
         else:
             credential = DefaultAzureCredential()
-        self._conn = self._create_client(credential, self.azure_synapse_workspace_dev_endpoint)
+        self._conn = self._create_client(
+            credential, self.azure_synapse_workspace_dev_endpoint)
 
         if self._conn is not None:
             return self._conn
@@ -201,7 +203,8 @@ class AzureSynapsePipelineHook(BaseHook):
             time.sleep(check_interval)
 
             try:
-                pipeline_run_status = self.get_pipeline_run_status(run_id=run_id)
+                pipeline_run_status = self.get_pipeline_run_status(
+                    run_id=run_id)
                 executed_after_token_refresh = True
             except ServiceRequestError:
                 if executed_after_token_refresh:

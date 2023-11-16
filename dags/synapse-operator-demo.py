@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from airflow.models import DAG
-from airflow.providers.microsoft.azure.operators.synapse import AzureSynapseRunPipelineOperator
+from operators.RunSynapsePipelineOperator import AzureSynapseRunPipelineOperator
 
 
 with DAG(
@@ -17,6 +17,7 @@ with DAG(
         azure_synapse_conn_id="azure_synapse_connection",
         pipeline_name="Pipeline 1",
         azure_synapse_workspace_dev_endpoint="https://ambika-synapse-workspace.dev.azuresynapse.net",
+        wait_for_termination=False
     )
 
     run_pipeline1

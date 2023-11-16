@@ -23,7 +23,7 @@ from azure.core.exceptions import ServiceRequestError
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.synapse.artifacts import ArtifactsClient
 from airflow.exceptions import AirflowException
-from airflow.hooks.base import BaseHook
+from airflow.hooks.base_hook import BaseHook
 from airflow.providers.microsoft.azure.utils import (
     get_field,
 )

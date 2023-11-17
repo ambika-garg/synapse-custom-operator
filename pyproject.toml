@@ -1,0 +1,2 @@
+[project.entry-points.apache_airflow_provider]
+provider_info = "plugins.__init__:get_provider_info"

@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from airflow.exceptions import AirflowException
 from airflow.hooks.base import BaseHook
 from airflow.models import BaseOperator, BaseOperatorLink, XCom
-from azureSynapseHook import (
+from hooks.azureSynapseHook import (
     AzureSynapsePipelineHook,
     AzureSynapsePipelineRunException,
     AzureSynapsePipelineRunStatus
@@ -18,56 +18,56 @@ if TYPE_CHECKING:
     from airflow.models.taskinstancekey import TaskInstanceKey
 
 
-# class AzureSynapsePipelineRunLink(BaseOperatorLink):
-#     """Constructs a link to monitor a pipeline run in Azure Synapse."""
+class AzureSynapsePipelineRunLink(BaseOperatorLink):
+    """Constructs a link to monitor a pipeline run in Azure Synapse."""
 
-#     name = "Monitor Pipeline Run"
+    name = "Monitor Pipeline Run"
 
-#     def get_fields_from_url(self, workspace_url):
-#         """
-#         Extracts the workspace_name, subscription_id and resource_group from the Synapse workspace url.
+    def get_fields_from_url(self, workspace_url):
+        """
+        Extracts the workspace_name, subscription_id and resource_group from the Synapse workspace url.
 
-#         :param workspace_url: The workspace url.
-#         """
-#         import re
-#         from urllib.parse import unquote, urlparse
+        :param workspace_url: The workspace url.
+        """
+        import re
+        from urllib.parse import unquote, urlparse
 
-#         pattern = r"https://web\.azuresynapse\.net\?workspace=(.*)"
-#         match = re.search(pattern, workspace_url)
+        pattern = r"https://web\.azuresynapse\.net\?workspace=(.*)"
+        match = re.search(pattern, workspace_url)
 
-#         if not match:
-#             raise ValueError("Invalid workspace URL format")
+        if not match:
+            raise ValueError("Invalid workspace URL format")
 
-#         extracted_text = match.group(1)
-#         parsed_url = urlparse(extracted_text)
-#         path = unquote(parsed_url.path)
-#         path_segments = path.split("/")
-#         if len(path_segments) < 5:
-#             raise
+        extracted_text = match.group(1)
+        parsed_url = urlparse(extracted_text)
+        path = unquote(parsed_url.path)
+        path_segments = path.split("/")
+        if len(path_segments) < 5:
+            raise
 
-#         return {
-#             "workspace_name": path_segments[-1],
-#             "subscription_id": path_segments[2],
-#             "resource_group": path_segments[4],
-#         }
+        return {
+            "workspace_name": path_segments[-1],
+            "subscription_id": path_segments[2],
+            "resource_group": path_segments[4],
+        }
 
-#     def get_link(self, operator: BaseOperator, *, ti_key: TaskInstanceKey):
-#         run_id = XCom.get_value(key="run_id", ti_key=ti_key) or ""
-#         conn_id = operator.azure_synapse_conn_id  # type: ignore
-#         conn = BaseHook.get_connection(conn_id)
-#         self.synapse_workspace_url = conn.host
+    def get_link(self, operator: BaseOperator, *, ti_key: TaskInstanceKey):
+        run_id = XCom.get_value(key="run_id", ti_key=ti_key) or ""
+        conn_id = operator.azure_synapse_conn_id  # type: ignore
+        conn = BaseHook.get_connection(conn_id)
+        self.synapse_workspace_url = conn.host
 
-#         fields = self.get_fields_from_url(self.synapse_workspace_url)
+        fields = self.get_fields_from_url(self.synapse_workspace_url)
 
-#         params = {
-#             "workspace": f"/subscriptions/{fields['subscription_id']}"
-#             f"/resourceGroups/{fields['resource_group']}/providers/Microsoft.Synapse"
-#             f"/workspaces/{fields['workspace_name']}",
-#         }
-#         encoded_params = urlencode(params)
-#         base_url = f"https://ms.web.azuresynapse.net/en/monitoring/pipelineruns/{run_id}?"
+        params = {
+            "workspace": f"/subscriptions/{fields['subscription_id']}"
+            f"/resourceGroups/{fields['resource_group']}/providers/Microsoft.Synapse"
+            f"/workspaces/{fields['workspace_name']}",
+        }
+        encoded_params = urlencode(params)
+        base_url = f"https://ms.web.azuresynapse.net/en/monitoring/pipelineruns/{run_id}?"
 
-#         return base_url + encoded_params
+        return base_url + encoded_params
 
 
 class AzureSynapseRunPipelineOperator(BaseOperator):
@@ -96,7 +96,7 @@ class AzureSynapseRunPipelineOperator(BaseOperator):
 
     template_fields: Sequence[str] = ("azure_synapse_conn_id",)
 
-    # operator_extra_links = (AzureSynapsePipelineRunLink(),)
+    operator_extra_links = (AzureSynapsePipelineRunLink(),)
 
     def __init__(
         self,

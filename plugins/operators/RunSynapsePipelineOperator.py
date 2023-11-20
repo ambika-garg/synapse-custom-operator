@@ -12,6 +12,7 @@ from hooks.azureSynapseHook import (
     AzureSynapsePipelineRunException,
     AzureSynapsePipelineRunStatus
 )
+import logging
 
 
 if TYPE_CHECKING:
@@ -67,6 +68,8 @@ class AzureSynapsePipelineRunLink(BaseOperatorLink):
         encoded_params = urlencode(params)
         base_url = f"https://ms.web.azuresynapse.net/en/monitoring/pipelineruns/{run_id}?"
 
+        logging.getLogger().info("Helloooooo")
+        logging.getLogger().info(base_url + encoded_params)
         return base_url + encoded_params
 
 

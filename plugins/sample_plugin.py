@@ -6,11 +6,11 @@ from operators.RunSynapsePipelineOperator import AzureSynapsePipelineRunLink, Az
 # Defining the plugin class
 class AirflowTestPlugin(AirflowPlugin):
     name = "test_plugin"
-    # hooks = [AzureSynapsePipelineHook]
+    hooks = [AzureSynapsePipelineHook]
     operator_extra_links = [
         AzureSynapsePipelineRunLink(),
      ]
     extra_links = [
         AzureSynapsePipelineRunLink(),
     ]
-    # operators = [AzureSynapseRunPipelineOperator]
+    operators = [AzureSynapseRunPipelineOperator]

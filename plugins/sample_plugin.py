@@ -10,5 +10,7 @@ class AirflowTestPlugin(AirflowPlugin):
     operator_extra_links = [
         AzureSynapsePipelineRunLink(),
      ]
-    # extra_links = [AzureSynapsePipelineRunLink]
+    extra_links = [
+        AzureSynapsePipelineRunLink(),
+    ]
     # operators = [AzureSynapseRunPipelineOperator]
